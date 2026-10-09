@@ -98,6 +98,7 @@ export default function Home() {
     [document, setDocument] = useState<AnyRecord | null>(null),
     [query, setQuery] = useState(''),
     [sources, setSources] = useState<AnyRecord[] | null>(null);
+  const [transfers, setTransfers] = useState<AnyRecord[]>([]);
   const [selectedCase, setSelectedCase] = useState<AnyRecord | null>(null),
     [from, setFrom] = useState(''),
     [to, setTo] = useState(''),
@@ -111,6 +112,15 @@ export default function Home() {
     const data = await api('dashboard');
     if (g !== generation.current) return;
     setDashboard(data);
+    // Each load lists every transfer still pending; ones resolved earlier stay visible.
+    const checked: AnyRecord[] = data.transfers || [];
+    setTransfers((shown) => [
+      ...shown.filter(
+        (t) =>
+          t.status !== 'pending_verification' && !checked.some((c) => c.intentId === t.intentId),
+      ),
+      ...checked,
+    ]);
     if (data.accounts?.length)
       setFrom((v) => (data.accounts.some((a: AnyRecord) => a.id === v) ? v : data.accounts[0].id));
   }
@@ -123,6 +133,7 @@ export default function Home() {
     setConversationId(null);
     setMessages([]);
     setSelectedCase(null);
+    setTransfers([]);
     setDocument(null);
     setDocs([]);
     setSources(null);
@@ -743,6 +754,16 @@ export default function Home() {
                     </aside>
                   </div>
                 </>
+              )}
+              {!operator && transfers.length > 0 && (
+                <section className="panel approvals">
+                  <h2>Transfers checked with the bank</h2>
+                  {transfers.map((t) => (
+                    <div key={t.intentId}>
+                      <p>{t.message}</p>
+                    </div>
+                  ))}
+                </section>
               )}
               {dashboard.approvals?.length > 0 && (
                 <section className="panel approvals">

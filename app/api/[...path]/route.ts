@@ -4,7 +4,7 @@ import { actor, sessionToken, sameOrigin, HttpError } from '../../../src/auth';
 import { people, person } from '../../../src/people';
 import { appDb } from '../../../src/db';
 import { bankRequest, BankError } from '../../../src/banking/client';
-import { transferMoney } from '../../../src/banking/actions';
+import { transferMoney, reconcileSafely } from '../../../src/banking/actions';
 import { sendMessage, answerWithEvidence } from '../../../src/agent/run';
 import { runTool } from '../../../src/agent/tools';
 import { caseDetail } from '../../../src/operator/view';
@@ -54,10 +54,12 @@ async function handler(request: Request, context: RouteContext) {
         return json({
           incidents: db.prepare('SELECT * FROM incidents ORDER BY created_at DESC').all(),
         });
-      const [accounts, movements, contacts] = await Promise.all([
+      const [accounts, movements, contacts, transfers] = await Promise.all([
         bankRequest(current.id, '/v1/accounts'),
         bankRequest(current.id, '/v1/movements'),
         bankRequest(current.id, '/v1/contacts'),
+        // A failed check must never break the customer's accounts page.
+        reconcileSafely(current.id),
       ]);
       const approvals = (
         db
@@ -66,7 +68,7 @@ async function handler(request: Request, context: RouteContext) {
           )
           .all(current.id, new Date().toISOString()) as any[]
       ).map((a) => ({ ...a, payload: JSON.parse(a.payload) }));
-      return json({ accounts, movements, contacts, approvals });
+      return json({ accounts, movements, contacts, approvals, transfers });
     }
     if (route === 'conversations') {
       if (current.role !== 'customer')

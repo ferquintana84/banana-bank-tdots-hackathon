@@ -6,7 +6,7 @@ import { person } from '../people';
 import { authorizeTransfer } from './authorization';
 import { bankRequest, BankError } from './client';
 import { dispatchTransfer, verifyTransfer, type Outcome } from './dispatch';
-import { customerMessage, lookupPhase, type Wording } from './outcome';
+import { customerMessage, lookupPhase, SETTLE_MS, type Wording } from './outcome';
 import { recordEvent } from '../telemetry';
 import type { Account, ActionResult, ToolContext, TransferInput } from '../types';
 export const transferSchema = z
@@ -20,6 +20,7 @@ export const transferSchema = z
 type Intent = {
   id: string;
   user_id: string;
+  conversation_id: string | null;
   payload: string;
   status: string;
   bank_reference: string | null;
@@ -27,6 +28,9 @@ type Intent = {
   created_at: string;
   last_sent_at: string | null;
 };
+// A check that fails must never do so silently. Error name only: never data or secrets.
+const logFailure = (where: string, e: unknown) =>
+  console.error(where, e instanceof Error ? e.name : 'unknown');
 const money = (cents: number) =>
   new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR' }).format(cents / 100);
 // Within one customer message, identical details are one intent however often the tool is called.
@@ -127,7 +131,9 @@ async function recheck(ctx: ToolContext, intent: Intent, input: TransferInput, i
       lookupPhase(intent.last_sent_at ?? intent.created_at),
     );
     if (verified !== 'resend') outcome = verified;
-  } catch {}
+  } catch (e) {
+    logFailure('transfer_recheck_failed', e);
+  }
   const wording: Wording =
     outcome.state === 'completed'
       ? identical
@@ -139,6 +145,70 @@ async function recheck(ctx: ToolContext, intent: Intent, input: TransferInput, i
           ? 'identical_pending'
           : 'pending_verification';
   return settle(ctx, intent, input, outcome, wording);
+}
+// What an older build left without a verified outcome.
+const LEGACY_TRANSPORT_ERROR = 'No response received from the bank.';
+// Reconciliation on read: asks the bank about this customer's unverified intents.
+// Never sends money.
+export async function reconcileIntents(userId: string, reference?: string) {
+  const rows = appDb()
+    .prepare(
+      `SELECT * FROM intents WHERE user_id=?1 AND bank_reference IS NOT NULL
+         AND (?2 IS NULL OR bank_reference=?2)
+         AND (status='pending_verification'
+           OR (status='processing' AND COALESCE(last_sent_at,created_at)<?3)
+           OR (status='failed' AND operation_id IS NULL AND error=?4))
+       ORDER BY created_at LIMIT 5`,
+    )
+    .all({
+      1: userId,
+      2: reference ?? null,
+      3: new Date(Date.now() - SETTLE_MS).toISOString(),
+      4: LEGACY_TRANSPORT_ERROR,
+    }) as Intent[];
+  const results: ActionResult[] = [];
+  for (const intent of rows) {
+    const ctx = {
+      userId,
+      conversationId: intent.conversation_id,
+      runId: randomUUID(),
+      intentId: intent.id,
+    };
+    try {
+      results.push(await recheck(ctx, intent, JSON.parse(intent.payload)));
+    } catch (e) {
+      logFailure('reconcile_intent_failed', e);
+    }
+  }
+  return results.map(({ intentId, status, message, reference }) => ({
+    intentId,
+    status,
+    message,
+    reference,
+  }));
+}
+// For callers that must not break when a check fails: the customer is shielded, the failure is logged.
+export const reconcileSafely = (userId: string, reference?: string) =>
+  reconcileIntents(userId, reference).catch((e) => {
+    logFailure('reconcile_failed', e);
+    return [] as Awaited<ReturnType<typeof reconcileIntents>>;
+  });
+// Verified status of the transfers already requested in a conversation, for the agent's context.
+export function conversationTransfers(userId: string, conversationId: string) {
+  const label: Record<string, string> = {
+    completed: 'completed, confirmed by the bank',
+    failed: 'not executed, no money moved',
+    pending_verification: 'pending verification, outcome unknown',
+  };
+  const rows = appDb()
+    .prepare(
+      'SELECT * FROM intents WHERE user_id=? AND conversation_id=? ORDER BY created_at DESC LIMIT 5',
+    )
+    .all(userId, conversationId) as Intent[];
+  return rows.map((intent) => {
+    const input = JSON.parse(intent.payload) as TransferInput;
+    return `- ${label[intent.status] || 'in progress'}: ${money(input.amountCents)} from ${input.fromAccountId} to ${input.toAccountId}, description ${JSON.stringify(input.concept)}, reference ${intent.bank_reference}`;
+  });
 }
 export async function transferMoney(ctx: ToolContext, args: unknown): Promise<ActionResult> {
   if (person(ctx.userId)?.role !== 'customer')
@@ -210,7 +280,7 @@ export async function transferMoney(ctx: ToolContext, args: unknown): Promise<Ac
       return settle(ctx, intent, input, {
         state: 'not_executed',
         reason: 'not_sent',
-        error: e.message,
+        error: 'The bank could not be reached before sending.',
       });
     throw e;
   }
@@ -223,7 +293,8 @@ export async function transferMoney(ctx: ToolContext, args: unknown): Promise<Ac
         .prepare('UPDATE intents SET last_sent_at=? WHERE id=?')
         .run(new Date().toISOString(), intent.id),
     );
-  } catch {
+  } catch (e) {
+    logFailure('transfer_dispatch_failed', e);
     // Once sent, an unexpected error proves nothing about the bank.
     outcome = { state: 'pending_verification', anomaly: false };
   }
