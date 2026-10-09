@@ -148,3 +148,13 @@ Comprobaciones nuevas, además del script: una función pura que traduce «respu
 | Fix 2 añadirá un estado antes de `sent`. | El diseño lo admite: la confirmación se intercala entre `requested` y `sent` sin tocar el resto. |
 | Otro banco con el mismo contrato se comporta distinto del simulador. | Solo se usan garantías documentadas: idempotencia por actor y referencia, y 404 si la operación no existe. Los datos de la consulta se comparan antes de afirmar «completada». |
 | La evidencia guarda más datos (cuentas, importes). | Se queda en la base local; ninguna API de cliente la expone y no contiene secretos. |
+
+## 6. Lo que aprendimos
+
+La primera ejecución de la parte (b) pasó la comprobación de tipos y las 18 pruebas, y aun así no funcionaba: R8 y R16 seguían sin cumplir.
+
+- **Qué pasó.** La consulta de conciliación lanzaba un error en cada llamada, por un fallo nuestro en la forma de pasar sus parámetros. Nadie lo veía porque quienes la llaman la envuelven en una red de seguridad (`.catch`) para que un fallo de comprobación nunca rompa la página de cuentas del cliente. La red que protege al cliente ocultó en silencio nuestro propio error.
+- **Quién lo detectó.** El script de reproducción. Los tipos y las pruebas no podían: ninguna prueba ejecutaba esa consulta. La evidencia por historias de cliente encontró lo que las comprobaciones aisladas dejaban pasar.
+- **Qué cambiamos.** Los parámetros de la consulta; un registro de cada fallo absorbido, solo con el nombre del error y nunca con datos ni secretos; y una prueba (`tests/reconcile.test.ts`) que ejecuta la consulta y que fallaba antes de la corrección. Una comprobación silenciosa ya no puede pasar inadvertida.
+
+Conecta directamente con la tesis: un sistema que falla en silencio también está afirmando algo que no puede verificar. Aquí afirmaba «no hay nada que conciliar» cuando en realidad no había mirado.
