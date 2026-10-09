@@ -395,6 +395,32 @@ const cases: Case[] = [
       };
     },
   },
+  {
+    id: 'R16',
+    story:
+      'A Lucía le dicen que su pago de 10 EUR a Bruno está pendiente de verificar y después abre sus cuentas: ¿le confirma la aplicación lo que pasó sin que ella haga nada más?',
+    scenario: 'read-unavailable',
+    contract:
+      'Al abrir las cuentas se comprueba con el banco y se informa del resultado; un solo cargo.',
+    run: async () => {
+      await prepare('read-unavailable');
+      const transfer = toBruno('R16');
+      const first = await send('lucia', transfer);
+      const opened = (await app('lucia', 'dashboard')).data.transfers?.find(
+        (t: any) => t.intentId === first.data.intentId,
+      );
+      const e = await effects(transfer, 'lucia', 'bruno');
+      return {
+        said: `al enviar: ${said(first)} · al abrir las cuentas: ${opened ? `\`${opened.status}\` · «${opened.message}»` : 'ninguna noticia de la transferencia'}`,
+        bank: e.text,
+        pass:
+          first.data.status === 'pending_verification' &&
+          opened?.status === 'completed' &&
+          e.debits === 1 &&
+          e.credits === 1,
+      };
+    },
+  },
 ];
 
 const cell = (value: string) => value.replace(/\|/g, '\\|').replace(/\s+/g, ' ');
