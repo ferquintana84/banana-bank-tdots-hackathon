@@ -7,7 +7,7 @@ const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'banana-proposals-'));
 process.env.DATA_DIR = temp;
 // No bank is reachable here: a test that tried to send money would not get a completion.
 process.env.BANK_URL = 'http://127.0.0.1:9';
-const { cancelTransfer, confirmTransfer, reconcileIntents } =
+const { cancelTransfer, confirmTransfer, conversationTransfers, reconcileIntents } =
   await import('../src/banking/actions');
 const { appDb, closeAppDb } = await import('../src/db');
 const payload = JSON.stringify({
@@ -20,15 +20,27 @@ const minutes = (n: number) => new Date(Date.now() + n * 60000).toISOString();
 // Writes a proposal and its intent directly, as a request would have left them.
 function seed(
   id: string,
-  options: { expiresAt?: string; consumedAt?: string | null; status?: string } = {},
+  options: {
+    expiresAt?: string;
+    consumedAt?: string | null;
+    status?: string;
+    conversationId?: string;
+  } = {},
 ) {
   const db = appDb();
+  if (options.conversationId)
+    db.prepare('INSERT OR IGNORE INTO conversations VALUES(?,?,?,?)').run(
+      options.conversationId,
+      'lucia',
+      'Test',
+      minutes(0),
+    );
   db.prepare(
     'INSERT INTO intents(id,user_id,conversation_id,run_id,payload,status,bank_reference,created_at) VALUES(?,?,?,?,?,?,?,?)',
   ).run(
     `intent-${id}`,
     'lucia',
-    null,
+    options.conversationId ?? null,
     'run',
     payload,
     options.status ?? 'proposed',
@@ -97,6 +109,35 @@ test('a confirmed transfer cannot be cancelled', () => {
 test('reconciliation does not treat an unconfirmed proposal as an unverified transfer', async () => {
   seed('untouched');
   assert.deepEqual(await reconcileIntents('lucia'), []);
+});
+const messages = (conversationId: string) =>
+  appDb().prepare('SELECT content FROM messages WHERE conversation_id=?').all(conversationId) as {
+    content: string;
+  }[];
+test('the agent is told which proposals are waiting, expired or cancelled', () => {
+  seed('listed-live', { conversationId: 'conv-list' });
+  seed('listed-expired', { conversationId: 'conv-list', expiresAt: minutes(-1) });
+  cancelTransfer('lucia', seed('listed-cancelled', { conversationId: 'conv-list' }));
+  const lines = conversationTransfers('lucia', 'conv-list').join('\n');
+  assert.match(lines, /proposed, waiting for the customer to press Confirm transfer, nothing sent/);
+  assert.match(lines, /proposal expired without confirmation, nothing sent/);
+  assert.match(lines, /cancelled by the customer, nothing sent/);
+  assert.doesNotMatch(lines, /completed/);
+});
+test('a cancellation is written back to the conversation it came from', () => {
+  cancelTransfer('lucia', seed('noted', { conversationId: 'conv-note' }));
+  assert.deepEqual(
+    messages('conv-note').map((m) => m.content),
+    ['You cancelled this transfer. Nothing was sent.'],
+  );
+});
+test('a proposal without a conversation writes nothing and does not break', () => {
+  const before = (appDb().prepare('SELECT COUNT(*) n FROM messages').get() as { n: number }).n;
+  assert.equal(cancelTransfer('lucia', seed('silent')).status, 'cancelled');
+  assert.equal(
+    (appDb().prepare('SELECT COUNT(*) n FROM messages').get() as { n: number }).n,
+    before,
+  );
 });
 after(() => {
   closeAppDb();

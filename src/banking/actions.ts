@@ -88,6 +88,18 @@ const tracer =
       step,
       bankStatus,
     });
+// What the customer did in the app, and what the bank verified, belongs in the conversation
+// where the transfer was asked for: otherwise the chat ends at "please confirm".
+function noteInConversation(intent: Intent, text: string) {
+  if (!intent.conversation_id) return;
+  try {
+    appDb()
+      .prepare('INSERT INTO messages VALUES(?,?,?,?,?,?)')
+      .run(randomUUID(), intent.conversation_id, 'assistant', text, new Date().toISOString(), null);
+  } catch (e) {
+    logFailure('conversation_note_failed', e);
+  }
+}
 // Stores the outcome and builds what the customer is told.
 async function settle(
   ctx: ToolContext,
@@ -183,7 +195,10 @@ async function recheck(ctx: ToolContext, intent: Intent, input: TransferInput) {
       : outcome.state === 'not_executed'
         ? 'resolved_not_executed'
         : 'pending_verification';
-  return settle(ctx, intent, input, outcome, wording);
+  const result = await settle(ctx, intent, input, outcome, wording);
+  // A conversation must never end on "pending": the resolution is written where it was asked.
+  if (outcome.state !== 'pending_verification') noteInConversation(intent, String(result.message));
+  return result;
 }
 // What an older build left without a verified outcome.
 const LEGACY_TRANSPORT_ERROR = 'No response received from the bank.';
@@ -239,7 +254,15 @@ export function conversationTransfers(userId: string, conversationId: string) {
     completed: 'completed, confirmed by the bank',
     failed: 'not executed, no money moved',
     pending_verification: 'pending verification, outcome unknown',
+    proposed: 'proposed, waiting for the customer to press Confirm transfer, nothing sent',
+    expired: 'proposal expired without confirmation, nothing sent',
+    cancelled: 'cancelled by the customer, nothing sent',
+    confirmed: 'confirmed by the customer, being sent',
+    processing: 'confirmed by the customer, being sent',
   };
+  const live = appDb().prepare(
+    'SELECT 1 FROM approvals WHERE intent_id=? AND consumed_at IS NULL AND expires_at>?',
+  );
   const rows = appDb()
     .prepare(
       'SELECT * FROM intents WHERE user_id=? AND conversation_id=? ORDER BY created_at DESC LIMIT 5',
@@ -247,7 +270,12 @@ export function conversationTransfers(userId: string, conversationId: string) {
     .all(userId, conversationId) as Intent[];
   return rows.map((intent) => {
     const input = JSON.parse(intent.payload) as TransferInput;
-    return `- ${label[intent.status] || 'in progress'}: ${money(input.amountCents)} from ${input.fromAccountId} to ${input.toAccountId}, description ${JSON.stringify(input.concept)}, reference ${intent.bank_reference}`;
+    // A proposal nobody confirmed in time is no longer waiting for anything.
+    const status =
+      intent.status === 'proposed' && !live.get(intent.id, new Date().toISOString())
+        ? 'expired'
+        : intent.status;
+    return `- ${label[status] || 'in progress'}: ${money(input.amountCents)} from ${input.fromAccountId} to ${input.toAccountId}, description ${JSON.stringify(input.concept)}, reference ${intent.bank_reference}`;
   });
 }
 // An identical transfer of this customer that is unverified or was completed recently (D11).
@@ -503,7 +531,12 @@ export async function confirmTransfer(userId: string, approvalId: string): Promi
       reference: intent.bank_reference,
       approvalId: approval.id,
     });
-    return execute(ctx, intent, input);
+    const result = await execute(ctx, intent, input);
+    noteInConversation(
+      intent,
+      `You confirmed this transfer in the app. ${String(result.message ?? '')}`.trim(),
+    );
+    return result;
   }
   intent = byId.get(approval.intent_id, userId) as Intent;
   const used = !!(
@@ -554,12 +587,14 @@ export function cancelTransfer(userId: string, approvalId: string): ActionResult
     return used;
   })();
   const intent = db.prepare('SELECT * FROM intents WHERE id=?').get(approval.intent_id) as Intent;
-  if (cancelled)
+  if (cancelled) {
     recordEvent(
       { userId, conversationId: intent.conversation_id, runId: randomUUID(), intentId: intent.id },
       'transfer.cancelled',
       { status: 'cancelled', intentId: intent.id, reference: intent.bank_reference, approvalId },
     );
+    noteInConversation(intent, CANCELLED_MESSAGE);
+  }
   if (cancelled || intent.status === 'cancelled')
     return { status: 'cancelled', intentId: intent.id, message: CANCELLED_MESSAGE };
   throw new HttpError(409, 'This transfer was already confirmed and cannot be cancelled.');
