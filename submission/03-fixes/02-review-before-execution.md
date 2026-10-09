@@ -1,9 +1,45 @@
 # Fix 2. Revisión explícita antes de ejecutar
 
-- **Estado:** diseño aprobado. Implementación en tres partes: (a) servidor, (b) agente y (c) interfaz.
+- **Estado:** implementado y verificado. Partes (a) servidor, (b) agente y (c) interfaz.
 - **Hallazgos que corrige:** H4 y H5 de `01-diagnosis.md` (regla 3 del contrato). Cubre H14 (cuenta de origen ambigua) y la observación humana O1.
 - **Evidencia «antes»:** R5 no cumple en `evidence/after-fix-1-ui.md`: el dinero sale sin confirmación.
+- **Evidencia «después»:** `evidence/after-fix-2c.md` y la prueba de aceptación humana (`02-acceptance-checklist.md`).
 - **Principio:** el modelo propone, la persona decide.
+
+## Resultado: antes y después
+
+El mismo script (`npm run repro`) se ejecutó antes y después de cada parte. Cada caso se juzga contra el contrato.
+
+| Momento | Casos que cumplen | Evidencia | Código |
+|---|---|---|---|
+| Tras Fix 1, antes de Fix 2 | 12 de 14 | `evidence/after-fix-1-ui.md` | `82f4856` |
+| Con los casos nuevos de Fix 2 añadidos, sin código | 11 de 18 | `evidence/before-fix-2.md` | — |
+| Tras la parte (a), servidor | 17 de 18 | `evidence/after-fix-2a.md` | `71cad24` |
+| Tras la parte (b), agente | 18 de 19 | `evidence/after-fix-2b.md` | `5ee7823` |
+| Tras la parte (c), interfaz | 18 de 19 | `evidence/after-fix-2c.md` | `b069881` |
+
+Cómo leer la tabla:
+
+- **R5 era el único caso de Fix 2 que ya existía**, y estaba en rojo tras Fix 1: el dinero salía sin confirmación.
+- **El número de casos crece** porque R18, R20, R21, R22 y R23 se añadieron para Fix 2 y se registraron en rojo antes de escribir el código que los corrige (`evidence/before-fix-2.md` y `evidence/before-fix-2b-r23.md`). Por eso la segunda fila baja a 11 de 18.
+- **R15 cambió de criterio** con D11; la segunda fila ya lo mide con el criterio nuevo.
+- **El único caso que sigue sin cumplir es R10**, la vista de operador, que queda fuera de las prioridades.
+
+Lo que cambió para el cliente:
+
+| Historia | Antes | Después |
+|---|---|---|
+| Lucía pide una transferencia (R5) | El dinero sale en la misma petición. | Ve una propuesta con importe, origen y destino; nada sale hasta que confirma. |
+| Lucía pulsa confirmar dos veces seguidas (R18) | No había nada que confirmar. | Tres confirmaciones, una sola operación y un solo cargo. |
+| Bruno intenta confirmar la propuesta de Lucía (R20) | — | Recibe 404 y no se mueve dinero. |
+| Alguien altera la confirmación para enviar 9.999 EUR a Diego (R21) | — | Se ejecutan los 10 EUR a Bruno que Lucía revisó, y nada más. |
+| Lucía cancela y después llega una confirmación (R22) | — | No se envía nada. |
+| Con un pago pendiente, Lucía pide otro idéntico (R15) | La aplicación decidía por ella no enviarlo. | Recibe una propuesta con una advertencia y decide ella. |
+| Lucía confirma un pago nacido en el chat (R23) | La conversación no recogía el resultado. | El resultado verificado, con su referencia, queda escrito en la conversación. |
+
+**Prueba de aceptación humana.** Fernando la ejecutó en el navegador el 2026-10-09: ocho secciones, del formulario y del chat, con el banco en modo normal y con dos escenarios de fallo. Todas se superaron, con cinco pagos confirmados y el saldo final exacto. En esa ejecución el asistente dijo que no se había enviado nada, se negó a confirmar con un «sí» escrito, no movió dinero ante la pregunta de Elena y preguntó qué cuenta usar. Resultados y capturas: `02-acceptance-checklist.md`.
+
+**Lo que esta evidencia no cubre.** La redacción del asistente depende del modelo y puede variar; lo garantizado por el servidor es que nada se envía sin confirmación. El punto de confirmación original (H5) no se pudo reproducir antes del código, porque nada creaba propuestas; su evidencia previa es la lectura del código. La caducidad de una propuesta está cubierta por una prueba en `tests/proposals.test.ts`, no por el script ni por la prueba humana. Quedan dos observaciones menores de interfaz, O4 y O5, pendientes de decisión.
 
 ## 1. El principio y la confirmación por chat
 
