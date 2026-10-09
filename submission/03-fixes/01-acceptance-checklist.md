@@ -83,6 +83,27 @@ El aviso de pendiente y el panel aparecen casi a la vez: el simulador solo falla
 
 **Resultado D:** SUPERADA. Saldo final de Lucía: 3.967,50 EUR.
 
+## E. Repetición de B tras corregir O2 y O3
+
+Se ejecutó el 2026-10-09 sobre el commit `82f4856` («fix: show each transfer status in one place»), con el banco recién restablecido.
+
+1. Recargar la página y abrir como Lucía.
+2. `npm run scenario -- read-unavailable`
+3. Transfers → Aurora account → Bruno Vidal → 10 → «Aceptación B5» → Send transfer.
+4. Sin cambiar ningún campo, Send transfer otra vez.
+5. Pulsar Assistant en el menú.
+
+| Paso | Debo ver | Captura | Resultado |
+|---|---|---|---|
+| B-5 (inicio) | Overview tras recargar: saldo de €4,007.50 y ningún panel | `B-5-inicio.png` | — |
+| B-5-0 | El formulario relleno con «Aceptación B5» antes de enviar | `B-5-0-formulario.png` | — |
+| B-5 | Tras el paso 3, ningún aviso amarillo. Solo el panel «Transfers checked with the bank» con «completed, once» (referencia `c933977c…`). Nada dice que esté pendiente. | `B-5-sin-contradiccion.png` | Sí |
+| B-6-0 | Tras el paso 4, aviso amarillo de completada con la misma referencia y ningún segundo cargo (el saldo sigue en €3,997.50) | `B-6-0-aviso-completada.png` | Sí |
+| B-6 | Tras el paso 5, la página Assistant sin el aviso amarillo y con el panel todavía visible | `B-6-cambio-pestana.png` | Sí |
+| B-5 (overview) | En Overview, un solo movimiento «Transfer · Aceptación B5» de −€10.00 y saldo de €3,997.50 | `B-5-overview.png` | Sí |
+
+**Resultado E:** SUPERADA. O2 y O3 quedan corregidas.
+
 ## Observaciones humanas
 
 Lo que Fernando vio durante la prueba y que ningún script comprueba.
@@ -90,8 +111,8 @@ Lo que Fernando vio durante la prueba y que ningún script comprueba.
 | ID | Observación | Estado |
 |---|---|---|
 | O1 | Tras una transferencia completada, el formulario conserva los mismos datos. Un segundo clic sería un pago nuevo y legítimo, probablemente no deseado. | Lo mitiga Fix 2, con la confirmación explícita. |
-| O2 | En B, el aviso de pendiente y el panel que dice «completed, once» se veían a la vez y se contradecían (`B-1-aviso-pendiente.png`). El aviso debería actualizarse cuando el panel resuelve la misma intención. | Pendiente de decisión. |
-| O3 | El aviso amarillo persiste al cambiar de página: en el chat seguía mostrando la referencia de la transferencia B del formulario, lo que puede confundir al cliente (`D-1-chat-pendiente.png`). | Pendiente de decisión. |
+| O2 | En B, el aviso de pendiente y el panel que dice «completed, once» se veían a la vez y se contradecían (`B-1-aviso-pendiente.png`). El aviso debería actualizarse cuando el panel resuelve la misma intención. | Corregida en `82f4856` (D10). Evidencia: `B-5-sin-contradiccion.png`. |
+| O3 | El aviso amarillo persiste al cambiar de página: en el chat seguía mostrando la referencia de la transferencia B del formulario, lo que puede confundir al cliente (`D-1-chat-pendiente.png`). | Corregida en `82f4856` (D10). Evidencia: `B-6-0-aviso-completada.png` y `B-6-cambio-pestana.png`. |
 
 ## Límites conocidos
 
