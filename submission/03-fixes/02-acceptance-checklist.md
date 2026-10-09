@@ -164,5 +164,5 @@ Las anotó el asistente de IA al abrir las capturas, no Fernando durante la prue
 
 | ID | Observación | Estado |
 |---|---|---|
-| O4 | La advertencia de pago idéntico dice «at 09 Oct at 20:53», con «at» repetido (`H-1-advertencia.png`). | Pendiente de decisión. |
-| O5 | Tras confirmar desde el chat, el mismo resultado aparece dos veces en pantalla: en el aviso amarillo y en la burbuja de la conversación (`I-2-chat-resultado.png`, `M-C-1-chat.png`). No se contradicen. | Pendiente de decisión. |
+| O4 | La advertencia de pago idéntico dice «at 09 Oct at 20:53», con «at» repetido (`H-1-advertencia.png`). | Corregida en `0cf739f`: ahora dice «on 09 Oct at 20:53». Pendiente de comprobación visual en la ejecución final. |
+| O5 | Tras confirmar desde el chat, el mismo resultado aparece dos veces en pantalla: en el aviso amarillo y en la burbuja de la conversación (`I-2-chat-resultado.png`, `M-C-1-chat.png`). No se contradicen. | Corregida en `0cf739f` (D12): el resultado escrito en la conversación abierta ya no se repite como aviso. Pendiente de comprobación visual en la ejecución final. |

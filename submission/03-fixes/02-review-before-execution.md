@@ -3,7 +3,7 @@
 - **Estado:** implementado y verificado. Partes (a) servidor, (b) agente y (c) interfaz.
 - **Hallazgos que corrige:** H4 y H5 de `01-diagnosis.md` (regla 3 del contrato). Cubre H14 (cuenta de origen ambigua) y la observación humana O1.
 - **Evidencia «antes»:** R5 no cumple en `evidence/after-fix-1-ui.md`: el dinero sale sin confirmación.
-- **Evidencia «después»:** `evidence/after-fix-2c.md` y la prueba de aceptación humana (`02-acceptance-checklist.md`).
+- **Evidencia «después»:** `evidence/after-fix-2-ui.md` y la prueba de aceptación humana (`02-acceptance-checklist.md`).
 - **Principio:** el modelo propone, la persona decide.
 
 ## Resultado: antes y después
@@ -17,6 +17,7 @@ El mismo script (`npm run repro`) se ejecutó antes y después de cada parte. Ca
 | Tras la parte (a), servidor | 17 de 18 | `evidence/after-fix-2a.md` | `71cad24` |
 | Tras la parte (b), agente | 18 de 19 | `evidence/after-fix-2b.md` | `5ee7823` |
 | Tras la parte (c), interfaz | 18 de 19 | `evidence/after-fix-2c.md` | `b069881` |
+| Tras el ajuste de interfaz (O4 y O5) | 18 de 19 | `evidence/after-fix-2-ui.md` | `0cf739f` |
 
 Cómo leer la tabla:
 
@@ -39,7 +40,7 @@ Lo que cambió para el cliente:
 
 **Prueba de aceptación humana.** Fernando la ejecutó en el navegador el 2026-10-09: ocho secciones, del formulario y del chat, con el banco en modo normal y con dos escenarios de fallo. Todas se superaron, con cinco pagos confirmados y el saldo final exacto. En esa ejecución el asistente dijo que no se había enviado nada, se negó a confirmar con un «sí» escrito, no movió dinero ante la pregunta de Elena y preguntó qué cuenta usar. Resultados y capturas: `02-acceptance-checklist.md`.
 
-**Lo que esta evidencia no cubre.** La redacción del asistente depende del modelo y puede variar; lo garantizado por el servidor es que nada se envía sin confirmación. El punto de confirmación original (H5) no se pudo reproducir antes del código, porque nada creaba propuestas; su evidencia previa es la lectura del código. La caducidad de una propuesta está cubierta por una prueba en `tests/proposals.test.ts`, no por el script ni por la prueba humana. Quedan dos observaciones menores de interfaz, O4 y O5, pendientes de decisión.
+**Lo que esta evidencia no cubre.** La redacción del asistente depende del modelo y puede variar; lo garantizado por el servidor es que nada se envía sin confirmación. El punto de confirmación original (H5) no se pudo reproducir antes del código, porque nada creaba propuestas; su evidencia previa es la lectura del código. La caducidad de una propuesta está cubierta por una prueba en `tests/proposals.test.ts`, no por el script ni por la prueba humana. Las dos observaciones menores de interfaz, O4 y O5, se corrigieron después en `0cf739f` (D12) y están pendientes de comprobación visual en la ejecución final.
 
 ## 1. El principio y la confirmación por chat
 
