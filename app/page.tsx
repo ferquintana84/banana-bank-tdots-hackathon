@@ -11,6 +11,9 @@ const date = (value: string) =>
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(value));
+const clock = (value: string) =>
+  new Intl.DateTimeFormat('en-IE', { hour: '2-digit', minute: '2-digit' }).format(new Date(value));
+const mask = (iban: string) => `${iban.slice(0, 9)} ···· ${iban.slice(-4)}`;
 async function api(path: string, body?: unknown) {
   const response = await fetch(`/api/${path}`, {
     method: body === undefined ? 'GET' : 'POST',
@@ -106,6 +109,9 @@ export default function Home() {
     [concept, setConcept] = useState('');
   const activeConversation = useRef<string | null>(null);
   const transferIntent = useRef('');
+  const formProposal = useRef('');
+  const reviewCard = useRef<HTMLElement>(null);
+  const [deciding, setDeciding] = useState<string | null>(null);
   const generation = useRef(0),
     messagesEnd = useRef<HTMLDivElement>(null);
   async function refresh(g = generation.current) {
@@ -148,6 +154,8 @@ export default function Home() {
     setAmount('');
     setConcept('');
     transferIntent.current = '';
+    formProposal.current = '';
+    setDeciding(null);
     setTab('overview');
     try {
       const result = await api('session', { userId: id });
@@ -175,6 +183,19 @@ export default function Home() {
   useEffect(() => {
     setNotice('');
   }, [tab]);
+  // A new proposal appears below the form or the chat: bring it into view.
+  const proposals: AnyRecord[] = dashboard?.approvals || [];
+  useEffect(() => {
+    if (proposals.length)
+      reviewCard.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [proposals.length]);
+  // An expired proposal must not stay on screen as if it could still be confirmed.
+  useEffect(() => {
+    if (!proposals.length) return;
+    const next = Math.min(...proposals.map((a) => Date.parse(a.expires_at)));
+    const timer = setTimeout(() => refresh().catch(() => {}), Math.max(0, next - Date.now()) + 500);
+    return () => clearTimeout(timer);
+  }, [dashboard]);
   async function openConversation(id: string) {
     const g = generation.current;
     activeConversation.current = id;
@@ -276,7 +297,9 @@ export default function Home() {
         intentId: transferIntent.current,
       });
       if (g !== generation.current) return;
-      if (result.status !== 'pending_verification') transferIntent.current = '';
+      // A proposal keeps its intent: reviewing again returns the same card, not a new one.
+      if (result.status === 'requires_confirmation') formProposal.current = result.approval.id;
+      else if (result.status !== 'pending_verification') transferIntent.current = '';
       // A pending transfer is shown only in the checked-transfers panel, where the same
       // intent is replaced once the bank answers. A notice would go stale and contradict it.
       if (result.status === 'pending_verification')
@@ -297,19 +320,40 @@ export default function Home() {
       if (g === generation.current) setBusy(false);
     }
   }
-  async function confirm(id: string) {
+  // The customer's decision on a proposal: the only way a transfer is ever sent.
+  async function decide(id: string, action: 'confirm' | 'cancel') {
     const g = generation.current;
+    setDeciding(id);
+    setError('');
     try {
-      const result = await api(`approvals/${id}/confirm`, {});
+      const result = await api(`approvals/${id}/${action}`, {});
       if (g !== generation.current) return;
-      setNotice(
-        result.status === 'completed'
-          ? 'Transfer confirmed and completed.'
-          : result.error || result.status,
-      );
+      // Each status in one place: a pending transfer lives in the checked-transfers panel.
+      if (result.status === 'pending_verification')
+        setTransfers((shown) => [...shown.filter((t) => t.intentId !== result.intentId), result]);
+      else setNotice(result.message || result.error || result.status);
+      if (id === formProposal.current) {
+        // O1: once confirmed, the form no longer holds a payment that one click would repeat.
+        if (action === 'confirm') {
+          setTo('');
+          setAmount('');
+          setConcept('');
+        }
+        formProposal.current = '';
+        transferIntent.current = '';
+      }
       await refresh(g);
+      // The outcome was written to the conversation it came from: show it there too.
+      const open = activeConversation.current;
+      if (open) {
+        const c = await api(`conversations/${open}`);
+        if (g === generation.current && activeConversation.current === open)
+          setMessages(c.messages);
+      }
     } catch (e) {
       if (g === generation.current) setError((e as Error).message);
+    } finally {
+      if (g === generation.current) setDeciding(null);
     }
   }
   const operator = current?.role === 'operator';
@@ -744,7 +788,7 @@ export default function Home() {
                         />
                       </label>
                       <button className="primary-button" disabled={busy}>
-                        {busy ? 'Processing…' : 'Send transfer'}
+                        {busy ? 'Preparing…' : 'Review transfer'}
                         <Icon name="arrow" />
                       </button>
                     </form>
@@ -776,21 +820,60 @@ export default function Home() {
                   ))}
                 </section>
               )}
-              {dashboard.approvals?.length > 0 && (
-                <section className="panel approvals">
-                  <h2>Proposals awaiting confirmation</h2>
-                  {dashboard.approvals.map((a: AnyRecord) => (
-                    <div key={a.id}>
-                      <p>
-                        <strong>{money(a.payload.amountCents)}</strong> · {a.payload.fromAccountId}{' '}
-                        → {a.payload.toAccountId}
-                      </p>
-                      <p>{a.payload.concept}</p>
-                      <button className="primary-button" onClick={() => confirm(a.id)}>
-                        Confirm these details
-                      </button>
-                    </div>
-                  ))}
+              {!operator && dashboard.approvals?.length > 0 && (
+                <section className="panel approvals" ref={reviewCard}>
+                  <h2>Review your transfer</h2>
+                  {dashboard.approvals.map((a: AnyRecord) => {
+                    const from = dashboard.accounts?.find(
+                      (x: AnyRecord) => x.id === a.payload.fromAccountId,
+                    );
+                    const to = dashboard.contacts?.find(
+                      (x: AnyRecord) => x.id === a.payload.toAccountId,
+                    );
+                    return (
+                      <div key={a.id}>
+                        <p>
+                          <strong>Amount: {money(a.payload.amountCents)}</strong>
+                        </p>
+                        <p>
+                          From:{' '}
+                          {from ? `${from.label} (${mask(from.iban)})` : a.payload.fromAccountId}
+                        </p>
+                        <p>
+                          To:{' '}
+                          {to
+                            ? `${to.name} · ${to.label} (${mask(to.iban)})`
+                            : a.payload.toAccountId}
+                        </p>
+                        <p>Description: {a.payload.concept}</p>
+                        {a.warning && (
+                          <p className="proposal-warning" role="alert">
+                            {a.warning.kind === 'completed'
+                              ? `You already completed an identical transfer at ${date(a.warning.at)} (reference ${a.warning.reference}). If you confirm, this will be a second, separate payment.`
+                              : a.warning.text}
+                          </p>
+                        )}
+                        <p className="muted">
+                          Nothing is sent until you confirm. This proposal expires at{' '}
+                          {clock(a.expires_at)}.
+                        </p>
+                        <button
+                          className="primary-button"
+                          disabled={deciding === a.id}
+                          onClick={() => decide(a.id, 'confirm')}
+                        >
+                          Confirm transfer
+                        </button>
+                        <button
+                          className="secondary-button"
+                          disabled={deciding === a.id}
+                          onClick={() => decide(a.id, 'cancel')}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    );
+                  })}
                 </section>
               )}
               {tab === 'overview' && operator && (

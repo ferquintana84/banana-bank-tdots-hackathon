@@ -867,6 +867,15 @@ label select {
   border-radius: 8px;
   margin-bottom: 10px;
 }
+.approvals button + button {
+  margin-left: 10px;
+}
+.proposal-warning {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f8ecb3;
+  margin: 10px 0;
+}
 .case-count {
   padding: 16px 22px;
   background: #e9efe0;
