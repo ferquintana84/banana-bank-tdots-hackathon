@@ -86,18 +86,20 @@ async function prepare(profile: string, seed = 17) {
   await admin('reset');
   await admin('scenario', { profile, seed });
 }
-async function appRow<T>(sql: string, ...params: unknown[]) {
+async function appRows<T>(sql: string, ...params: unknown[]) {
   const Database = (await import('better-sqlite3')).default;
   const db = new Database(path.join(config.dataDir, 'app.sqlite'), {
     readonly: true,
     fileMustExist: true,
   });
   try {
-    return db.prepare(sql).get(...params) as T | undefined;
+    return db.prepare(sql).all(...params) as T[];
   } finally {
     db.close();
   }
 }
+const appRow = async <T>(sql: string, ...params: unknown[]) =>
+  (await appRows<T>(sql, ...params))[0] as T | undefined;
 
 // What the customer sees: balance and the movements carrying this concept.
 async function ledger(userId: string, accountId: string, concept: string) {
@@ -418,6 +420,38 @@ const cases: Case[] = [
           opened?.status === 'completed' &&
           e.debits === 1 &&
           e.credits === 1,
+      };
+    },
+  },
+  {
+    id: 'R17',
+    story:
+      'Lucía envía 10 EUR a Bruno y se pierde la respuesta del banco: si mañana pregunta, ¿queda constancia de cada paso?',
+    scenario: 'lost-response',
+    contract:
+      'Quedan registrados el envío, la consulta y el resultado verificado, con referencia y operación.',
+    run: async () => {
+      await prepare('lost-response');
+      const result = await send('lucia', toBruno('R17'));
+      const steps = (
+        await appRows<{ kind: string; data: string }>(
+          "SELECT kind,data FROM events WHERE json_extract(data,'$.intentId')=? ORDER BY created_at,rowid",
+          String(result.data.intentId),
+        )
+      ).map((e): Record<string, any> => ({ kind: e.kind, ...JSON.parse(e.data) }));
+      const find = (kind: string, step?: string) =>
+        steps.find((s) => s.kind === kind && (!step || s.step === step));
+      const outcome = find('transfer.completed');
+      return {
+        said: said(result),
+        bank: steps.length
+          ? `Registro: ${steps.map((s) => `${s.kind.replace('transfer.', '')}${s.step ? ` ${s.step}` : ''}${'bankStatus' in s ? ` (${s.bankStatus ?? 'sin respuesta'})` : ''}`).join(' → ')}`
+          : 'Registro: ningún paso asociado a la orden',
+        pass:
+          find('transfer.bank_answer', 'send')?.bankStatus === 504 &&
+          find('transfer.bank_answer', 'lookup')?.bankStatus === 200 &&
+          !!outcome?.reference &&
+          !!outcome?.operationId,
       };
     },
   },
