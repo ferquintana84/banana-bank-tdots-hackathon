@@ -29,3 +29,17 @@ Cada entrada sigue el mismo formato: fecha, decisión, alternativas descartadas 
 - **Decisión:** abordamos uno o dos problemas de alto daño a fondo, en lugar de muchos de forma superficial. Cada corrección se acepta con una historia real de cliente del lunes (por ejemplo, «Lucía envía 85 EUR y se corta la conexión»), no solo con tests aislados.
 - **Alternativas descartadas:** dejar que varios agentes corrijan todo en paralelo.
 - **Motivo:** el enunciado valora las correcciones bien elegidas y bien evidenciadas (`docs/challenge.md:86`) y pide comprobar los cambios con conversaciones y operaciones nuevas (`docs/challenge.md:13`). Al invertir la revisión («¿cómo fallará la mayoría de las entregas?»), la respuesta apunta a correcciones superficiales y sin evidencia.
+
+## D5. Prioridades de la Parte 1
+
+- **Fecha:** 2026-10-09.
+- **Decisión:** se abordan dos correcciones, en este orden. Fix 1: integridad de la transferencia ante la incertidumbre (H1, H2 y H3 de `01-diagnosis.md`; reglas 4 y 5 del contrato). Fix 2: revisión explícita antes de ejecutar (H4 y H5; regla 3), que cubre también la cuenta de origen ambigua (H14).
+- **Alternativas descartadas:** priorizar la fundamentación documental (H6-H9) como segunda corrección; corregir la vista de operador y el registro de evidencia (H10, H11) dentro de la Parte 1; corregir los detalles menores de interfaz (H15), incluida la máscara del IBAN.
+- **Motivo:** Fix 1 y Fix 2 son los fallos con mayor daño (dinero), ocurren en el camino normal con el perfil por defecto del banco y se verifican de forma determinista con los escenarios del simulador, sin depender del modelo. La fundamentación documental es muy probable, pero su verificación depende del modelo y encaja mejor como base de la Parte 2 (D6). La vista de operador queda documentada como pendiente. La hipótesis del enmascarado se rebajó a detalle menor porque la evidencia la corrigió (`01-diagnosis.md`, sección 6).
+
+## D6. Dirección de la Parte 2 y lenguaje común de confianza
+
+- **Fecha:** 2026-10-09.
+- **Decisión:** la Parte 2 es «¿Y en mi caso?»: el asistente responde a preguntas personales cruzando la política vigente con los movimientos reales del cliente, y cada afirmación lleva su fuente. Sus cimientos son quitar la instrucción que pide inventar (H6) y hacer visibles las fuentes (H7). Toda la entrega usa un mismo lenguaje de confianza con tres elementos: verificado, no verificado y siguiente paso. Fix 1 lo introduce para el dinero con el estado «pendiente de verificar»; la Parte 2 lo aplica a la información.
+- **Alternativas descartadas:** el expediente de caso con evidencia para el operador (candidata B), que queda como opcional si sobra tiempo; tratar H6 y H7 como correcciones independientes de la Parte 1.
+- **Motivo:** la candidata A es visible para el cliente, nace de una observación propia del recorrido manual (observación 4) y es la aplicación directa de la tesis a la información. Un único lenguaje para el dinero y para la información hace que correcciones y funcionalidad se refuercen entre sí en lugar de ser piezas sueltas.
