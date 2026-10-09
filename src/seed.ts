@@ -43,7 +43,9 @@ export function seedApp() {
         );
       }
     }
-    db.prepare('INSERT INTO intents VALUES(?,?,?,?,?,?,?,?,?,?)').run(
+    db.prepare(
+      'INSERT INTO intents(id,user_id,conversation_id,run_id,payload,status,bank_reference,operation_id,error,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)',
+    ).run(
       'intent-historic-lucia',
       'lucia',
       'conv-lucia-support',

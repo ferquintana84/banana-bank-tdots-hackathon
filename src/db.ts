@@ -25,6 +25,10 @@ export function appDb() {
       CREATE INDEX IF NOT EXISTS incidents_user ON incidents(user_id);
       CREATE INDEX IF NOT EXISTS events_conversation ON events(conversation_id,created_at);
     `);
+    // Added after the original schema, so existing databases gain the column too.
+    const columns = instance.pragma('table_info(intents)') as { name: string }[];
+    if (!columns.some((c) => c.name === 'last_sent_at'))
+      instance.exec('ALTER TABLE intents ADD COLUMN last_sent_at TEXT');
   }
   return instance;
 }

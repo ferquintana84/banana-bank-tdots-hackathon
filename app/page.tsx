@@ -104,6 +104,7 @@ export default function Home() {
     [amount, setAmount] = useState(''),
     [concept, setConcept] = useState('');
   const activeConversation = useRef<string | null>(null);
+  const transferIntent = useRef('');
   const generation = useRef(0),
     messagesEnd = useRef<HTMLDivElement>(null);
   async function refresh(g = generation.current) {
@@ -133,6 +134,7 @@ export default function Home() {
     setTo('');
     setAmount('');
     setConcept('');
+    transferIntent.current = '';
     setTab('overview');
     try {
       const result = await api('session', { userId: id });
@@ -243,6 +245,8 @@ export default function Home() {
     setError('');
     setNotice('');
     try {
+      // The same click repeated after a network failure is the same intent.
+      if (!transferIntent.current) transferIntent.current = crypto.randomUUID();
       const result = await api('actions', {
         name: 'transfer_money',
         arguments: {
@@ -252,14 +256,17 @@ export default function Home() {
           concept,
         },
         conversationId,
+        intentId: transferIntent.current,
       });
       if (g !== generation.current) return;
+      if (result.status !== 'pending_verification') transferIntent.current = '';
       setNotice(
-        result.status === 'completed'
-          ? 'Transfer completed. You can check it in your activity.'
-          : result.status === 'requires_confirmation'
-            ? 'Review the proposal to confirm the transfer.'
-            : result.error || 'The operation is still pending.',
+        result.message ||
+          (result.status === 'completed'
+            ? 'Transfer completed. You can check it in your activity.'
+            : result.status === 'requires_confirmation'
+              ? 'Review the proposal to confirm the transfer.'
+              : result.error || 'The operation is still pending.'),
       );
       await refresh(g);
     } catch (e) {
@@ -648,7 +655,14 @@ export default function Home() {
                       <h2>Your transfer details</h2>
                       <label>
                         From account
-                        <select value={from} onChange={(e) => setFrom(e.target.value)} required>
+                        <select
+                          value={from}
+                          onChange={(e) => {
+                            transferIntent.current = '';
+                            setFrom(e.target.value);
+                          }}
+                          required
+                        >
                           {dashboard.accounts?.map((a: AnyRecord) => (
                             <option key={a.id} value={a.id}>
                               {a.label} · {a.id} · {money(a.balanceCents)}
@@ -658,7 +672,14 @@ export default function Home() {
                       </label>
                       <label>
                         Recipient
-                        <select value={to} onChange={(e) => setTo(e.target.value)} required>
+                        <select
+                          value={to}
+                          onChange={(e) => {
+                            transferIntent.current = '';
+                            setTo(e.target.value);
+                          }}
+                          required
+                        >
                           <option value="">Select an account</option>
                           {dashboard.contacts?.map((a: AnyRecord) => (
                             <option key={a.id} value={a.id}>
@@ -678,7 +699,10 @@ export default function Home() {
                             max="100000"
                             required
                             value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
+                            onChange={(e) => {
+                              transferIntent.current = '';
+                              setAmount(e.target.value);
+                            }}
                             placeholder="0.00"
                           />
                           <span>EUR</span>
@@ -688,7 +712,10 @@ export default function Home() {
                         Description
                         <input
                           value={concept}
-                          onChange={(e) => setConcept(e.target.value)}
+                          onChange={(e) => {
+                            transferIntent.current = '';
+                            setConcept(e.target.value);
+                          }}
                           placeholder="What is this transfer for?"
                           maxLength={200}
                           required
