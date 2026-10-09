@@ -362,6 +362,17 @@ const cases: Case[] = [
       };
     },
   },
+  {
+    id: 'R14',
+    story:
+      'Lucía envía 10 EUR a Bruno y el banco rechaza el primer intento sin llegar a ejecutarlo: ¿se completa el pago una sola vez?',
+    scenario: 'reject-before',
+    contract: 'Un solo cargo y ningún «fallida» sobre un pago hecho.',
+    run: async () => {
+      await prepare('reject-before');
+      return singlePayment('R14');
+    },
+  },
 ];
 
 const cell = (value: string) => value.replace(/\|/g, '\\|').replace(/\s+/g, ' ');
