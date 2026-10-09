@@ -127,6 +127,8 @@ Este punto modifica D8 y está registrado como D11.
 
 La frase del «sí» en el chat la redacta el modelo a partir de sus instrucciones; su texto exacto no se puede garantizar.
 
+**La hora la dice la pantalla, no el servidor.** El servidor no conoce la zona horaria del cliente, así que sus mensajes dicen «expires in N minutes» e «in the last 24 hours», y llevan la marca de tiempo exacta como dato. La hora de reloj («at {time}») la muestra solo la tarjeta, calculada en el navegador. Es la tesis aplicada hasta al reloj: el sistema no afirma una hora que no puede conocer.
+
 ## 7. Casos de reproducción
 
 | Caso | Historia del cliente | Pasa cuando | ¿Rojo antes del código? |

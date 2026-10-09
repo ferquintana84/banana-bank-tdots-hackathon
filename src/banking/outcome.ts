@@ -34,13 +34,7 @@ export function afterLookup(status: number | null, matches: boolean, phase: Look
   return { next: 'pending_verification', anomaly: false };
 }
 export type Wording =
-  | Reason
-  | 'completed'
-  | 'pending_verification'
-  | 'resolved_completed'
-  | 'resolved_not_executed'
-  | 'identical_pending'
-  | 'identical_completed';
+  Reason | 'completed' | 'pending_verification' | 'resolved_completed' | 'resolved_not_executed';
 export type Details = { amount: string; recipient: string; account: string; reference: string };
 export function customerMessage(kind: Wording, d: Details) {
   const transfer = `your transfer of ${d.amount} to ${d.recipient}`;
@@ -60,9 +54,15 @@ export function customerMessage(kind: Wording, d: Details) {
     case 'not_recorded':
     case 'resolved_not_executed':
       return `We have checked with the bank: ${transfer} was not made and no money has left your account. If you still want to send it, you can start it again.`;
-    case 'identical_pending':
-      return `You already have an identical transfer being verified (${d.amount} to ${d.recipient}). We have not sent a second one, so you cannot pay twice.`;
-    case 'identical_completed':
-      return `We have checked with the bank: your earlier transfer of ${d.amount} to ${d.recipient} was completed, once. Reference: ${d.reference}. We have not sent it again. If you want to make a second, separate payment, ask us again and we will send it.`;
   }
 }
+// The server never states a clock time: it does not know the customer's time zone.
+export const proposalMessage = (d: Details, minutes: number) =>
+  `We have prepared a transfer of ${d.amount} from ${d.account} to ${d.recipient}. Nothing has been sent yet. Please review it and press Confirm transfer. This proposal expires in ${minutes} minute${minutes === 1 ? '' : 's'}.`;
+export const EXPIRED_MESSAGE =
+  'This proposal has expired and nothing was sent. If you still want to make the transfer, start it again.';
+export const CANCELLED_MESSAGE = 'You cancelled this transfer. Nothing was sent.';
+export const warningMessage = (kind: 'pending' | 'completed', reference: string) =>
+  kind === 'pending'
+    ? `You already have an identical transfer being verified (reference ${reference}). If you confirm, this will be a second, separate payment.`
+    : `You already completed an identical transfer in the last 24 hours (reference ${reference}). If you confirm, this will be a second, separate payment.`;

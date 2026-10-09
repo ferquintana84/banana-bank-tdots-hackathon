@@ -11,6 +11,7 @@ const TRANSFER_FIELDS = [
   'status',
   'reason',
   'operationId',
+  'approvalId',
 ] as const;
 export function recordEvent(ctx: ToolContext, kind: string, data: Record<string, unknown>) {
   const kept = kind.startsWith('transfer.')

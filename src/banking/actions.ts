@@ -6,7 +6,16 @@ import { person } from '../people';
 import { authorizeTransfer } from './authorization';
 import { bankRequest, BankError } from './client';
 import { dispatchTransfer, verifyTransfer, type Outcome, type Trace } from './dispatch';
-import { customerMessage, lookupPhase, SETTLE_MS, type Wording } from './outcome';
+import {
+  CANCELLED_MESSAGE,
+  customerMessage,
+  EXPIRED_MESSAGE,
+  lookupPhase,
+  proposalMessage,
+  SETTLE_MS,
+  warningMessage,
+  type Wording,
+} from './outcome';
 import { recordEvent } from '../telemetry';
 import type { Account, ActionResult, ToolContext, TransferInput } from '../types';
 export const transferSchema = z
@@ -25,9 +34,20 @@ type Intent = {
   status: string;
   bank_reference: string | null;
   operation_id: string | null;
+  error: string | null;
   created_at: string;
   last_sent_at: string | null;
 };
+type Approval = {
+  id: string;
+  user_id: string;
+  intent_id: string;
+  payload: string;
+  expires_at: string;
+  consumed_at: string | null;
+};
+const APPROVAL_TTL_MS = 10 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
 // A check that fails must never do so silently. Error name only: never data or secrets.
 const logFailure = (where: string, e: unknown) =>
   console.error(where, e instanceof Error ? e.name : 'unknown');
@@ -137,14 +157,20 @@ async function settle(
   };
 }
 // Asks the bank about an intent whose outcome is still unknown. Never sends money.
-async function recheck(ctx: ToolContext, intent: Intent, input: TransferInput, identical = false) {
+async function recheck(ctx: ToolContext, intent: Intent, input: TransferInput) {
+  // A confirmed intent with no send recorded may be about to be sent: nothing is settled yet.
+  const phase = intent.last_sent_at
+    ? lookupPhase(intent.last_sent_at)
+    : ['confirmed', 'processing'].includes(intent.status)
+      ? 'unsettled'
+      : lookupPhase(intent.created_at);
   let outcome: Outcome = { state: 'pending_verification', anomaly: false };
   try {
     const verified = await verifyTransfer(
       ctx.userId,
       input,
       intent.bank_reference!,
-      lookupPhase(intent.last_sent_at ?? intent.created_at),
+      phase,
       tracer(ctx, intent),
     );
     if (verified !== 'resend') outcome = verified;
@@ -153,14 +179,10 @@ async function recheck(ctx: ToolContext, intent: Intent, input: TransferInput, i
   }
   const wording: Wording =
     outcome.state === 'completed'
-      ? identical
-        ? 'identical_completed'
-        : 'resolved_completed'
+      ? 'resolved_completed'
       : outcome.state === 'not_executed'
         ? 'resolved_not_executed'
-        : identical
-          ? 'identical_pending'
-          : 'pending_verification';
+        : 'pending_verification';
   return settle(ctx, intent, input, outcome, wording);
 }
 // What an older build left without a verified outcome.
@@ -173,7 +195,7 @@ export async function reconcileIntents(userId: string, reference?: string) {
       `SELECT * FROM intents WHERE user_id=?1 AND bank_reference IS NOT NULL
          AND (?2 IS NULL OR bank_reference=?2)
          AND (status='pending_verification'
-           OR (status='processing' AND COALESCE(last_sent_at,created_at)<?3)
+           OR (status IN ('processing','confirmed') AND COALESCE(last_sent_at,created_at)<?3)
            OR (status='failed' AND operation_id IS NULL AND error=?4))
        ORDER BY created_at LIMIT 5`,
     )
@@ -228,83 +250,132 @@ export function conversationTransfers(userId: string, conversationId: string) {
     return `- ${label[intent.status] || 'in progress'}: ${money(input.amountCents)} from ${input.fromAccountId} to ${input.toAccountId}, description ${JSON.stringify(input.concept)}, reference ${intent.bank_reference}`;
   });
 }
-export async function transferMoney(ctx: ToolContext, args: unknown): Promise<ActionResult> {
-  if (person(ctx.userId)?.role !== 'customer')
-    throw new HttpError(403, 'A customer account is required.');
-  const input = transferSchema.parse(args),
-    db = appDb(),
-    payload = JSON.stringify(input);
-  const byId = db.prepare('SELECT * FROM intents WHERE id=?');
-  const previous = byId.get(ctx.intentId) as Intent | undefined;
-  if (previous && (previous.user_id !== ctx.userId || previous.payload !== payload))
-    throw new HttpError(409, 'This intent belongs to a different payload.');
-  // Same intent again: a completed one returns its verified result, a pending one is rechecked.
-  if (previous?.status === 'completed' && previous.operation_id) {
-    const reference = previous.bank_reference!;
-    const found = await verifyTransfer(
-      ctx.userId,
-      input,
-      reference,
-      'unsettled',
-      tracer(ctx, previous),
-    ).catch(() => null);
-    return {
-      status: 'completed',
-      operation:
-        found && found !== 'resend' && found.state === 'completed'
-          ? found.operation
-          : {
-              id: previous.operation_id,
-              userId: ctx.userId,
-              reference,
-              ...input,
-              status: 'completed',
-            },
-      intentId: previous.id,
-      reference,
-      message: customerMessage('completed', await describe(ctx.userId, input, reference)),
+// An identical transfer of this customer that is unverified or was completed recently (D11).
+// Computed when the proposal is shown, so it reflects the state at decision time.
+export function identicalWarning(userId: string, payload: string, intentId: string) {
+  const other = appDb()
+    .prepare(
+      `SELECT status,bank_reference,COALESCE(last_sent_at,created_at) AS at FROM intents
+       WHERE user_id=? AND payload=? AND id<>?
+         AND (status='pending_verification'
+           OR (status='completed' AND COALESCE(last_sent_at,created_at)>?))
+       ORDER BY status='pending_verification' DESC, at DESC LIMIT 1`,
+    )
+    .get(userId, payload, intentId, new Date(Date.now() - DAY_MS).toISOString()) as
+    { status: string; bank_reference: string; at: string } | undefined;
+  if (!other) return null;
+  const kind = other.status === 'completed' ? ('completed' as const) : ('pending' as const);
+  return {
+    kind,
+    reference: other.bank_reference,
+    at: other.at,
+    text: warningMessage(kind, other.bank_reference),
+  };
+}
+async function propose(ctx: ToolContext, intent: Intent, input: TransferInput) {
+  const db = appDb(),
+    now = Date.now();
+  // One live proposal per intent: asking again returns the same one.
+  let approval = db
+    .prepare(
+      'SELECT * FROM approvals WHERE intent_id=? AND consumed_at IS NULL AND expires_at>? ORDER BY expires_at DESC LIMIT 1',
+    )
+    .get(intent.id, new Date(now).toISOString()) as Approval | undefined;
+  if (!approval) {
+    const created: Approval = {
+      id: randomUUID(),
+      user_id: ctx.userId,
+      intent_id: intent.id,
+      payload: intent.payload,
+      expires_at: new Date(now + APPROVAL_TTL_MS).toISOString(),
+      consumed_at: null,
     };
+    db.transaction(() => {
+      db.prepare('INSERT INTO approvals VALUES(?,?,?,?,?,?)').run(
+        created.id,
+        created.user_id,
+        created.intent_id,
+        created.payload,
+        created.expires_at,
+        null,
+      );
+      db.prepare('UPDATE intents SET status=?,error=NULL WHERE id=?').run('proposed', intent.id);
+    })();
+    approval = created;
+    recordEvent(ctx, 'transfer.proposed', {
+      status: 'proposed',
+      intentId: intent.id,
+      reference: intent.bank_reference,
+      approvalId: created.id,
+    });
   }
-  if (previous?.status === 'pending_verification') return recheck(ctx, previous, input);
-  if (!previous) {
-    // D8: an identical request while one is unverified is reconciled first, never sent blindly.
-    const pending = db
-      .prepare(
-        "SELECT * FROM intents WHERE user_id=? AND payload=? AND status='pending_verification' ORDER BY created_at LIMIT 1",
-      )
-      .get(ctx.userId, payload) as Intent | undefined;
-    if (pending) {
-      const result = await recheck(ctx, pending, input, true);
-      if (result.status !== 'failed') return result;
-    }
-    db.prepare(
-      'INSERT OR IGNORE INTO intents(id,user_id,conversation_id,run_id,payload,status,bank_reference,created_at) VALUES(?,?,?,?,?,?,?,?)',
-    ).run(
-      ctx.intentId,
-      ctx.userId,
-      ctx.conversationId,
-      ctx.runId,
-      payload,
-      'created',
-      randomUUID(),
-      new Date().toISOString(),
-    );
-  }
-  let intent = byId.get(ctx.intentId) as Intent;
-  if (!intent.bank_reference) {
-    db.prepare('UPDATE intents SET bank_reference=? WHERE id=?').run(randomUUID(), intent.id);
-    intent = byId.get(ctx.intentId) as Intent;
-  }
+  const details = await describe(ctx.userId, input, intent.bank_reference!);
+  const minutes = Math.max(1, Math.ceil((Date.parse(approval.expires_at) - now) / 60000));
+  return {
+    status: 'requires_confirmation',
+    intentId: intent.id,
+    approval: {
+      id: approval.id,
+      expiresAt: approval.expires_at,
+      payload: input,
+      summary: {
+        amount: details.amount,
+        account: details.account,
+        recipient: details.recipient,
+        concept: input.concept,
+      },
+      warning: identicalWarning(ctx.userId, intent.payload, intent.id),
+    },
+    message: proposalMessage(details, minutes),
+  };
+}
+// The verified result of an intent that already completed. Never sends anything.
+async function completedResult(ctx: ToolContext, intent: Intent, input: TransferInput) {
+  const reference = intent.bank_reference!;
+  const found = await verifyTransfer(
+    ctx.userId,
+    input,
+    reference,
+    'unsettled',
+    tracer(ctx, intent),
+  ).catch(() => null);
+  return {
+    status: 'completed',
+    operation:
+      found && found !== 'resend' && found.state === 'completed'
+        ? found.operation
+        : {
+            id: intent.operation_id,
+            userId: ctx.userId,
+            reference,
+            ...input,
+            status: 'completed',
+          },
+    intentId: intent.id,
+    reference,
+    message: customerMessage('completed', await describe(ctx.userId, input, reference)),
+  };
+}
+// From here on Fix 1 applies: one reference, verify before stating, pending when in doubt.
+// Only a confirmed proposal reaches this point.
+async function execute(ctx: ToolContext, intent: Intent, input: TransferInput) {
+  const db = appDb();
   try {
     const permission = await authorizeTransfer(ctx, input);
     if (permission) return permission;
   } catch (e) {
-    // The bank could not be reached before sending: nothing left the application.
+    // Nothing has left the application yet: both cases are a verified "not executed".
     if (e instanceof BankError && e.status >= 500)
       return settle(ctx, intent, input, {
         state: 'not_executed',
         reason: 'not_sent',
         error: 'The bank could not be reached before sending.',
+      });
+    if (e instanceof HttpError)
+      return settle(ctx, intent, input, {
+        state: 'not_executed',
+        reason: 'refused',
+        error: e.message,
       });
     throw e;
   }
@@ -332,4 +403,164 @@ export async function transferMoney(ctx: ToolContext, args: unknown): Promise<Ac
     outcome = { state: 'pending_verification', anomaly: false };
   }
   return settle(ctx, intent, input, outcome);
+}
+// Asking for a transfer only ever creates a proposal: the model proposes, the person decides.
+export async function transferMoney(ctx: ToolContext, args: unknown): Promise<ActionResult> {
+  if (person(ctx.userId)?.role !== 'customer')
+    throw new HttpError(403, 'A customer account is required.');
+  const input = transferSchema.parse(args),
+    db = appDb(),
+    payload = JSON.stringify(input);
+  const byId = db.prepare('SELECT * FROM intents WHERE id=?');
+  const previous = byId.get(ctx.intentId) as Intent | undefined;
+  if (previous && (previous.user_id !== ctx.userId || previous.payload !== payload))
+    throw new HttpError(409, 'This intent belongs to a different payload.');
+  // Same intent again: a verified or in-flight one reports its state and never proposes anew.
+  if (previous?.status === 'completed' && previous.operation_id)
+    return completedResult(ctx, previous, input);
+  if (previous && ['pending_verification', 'confirmed', 'processing'].includes(previous.status))
+    return recheck(ctx, previous, input);
+  if (!previous) {
+    // D11: an identical unverified transfer is reconciled first, so the warning is accurate.
+    const pending = db
+      .prepare(
+        "SELECT * FROM intents WHERE user_id=? AND payload=? AND status='pending_verification' ORDER BY created_at LIMIT 1",
+      )
+      .get(ctx.userId, payload) as Intent | undefined;
+    if (pending) await recheck(ctx, pending, input);
+    db.prepare(
+      'INSERT OR IGNORE INTO intents(id,user_id,conversation_id,run_id,payload,status,bank_reference,created_at) VALUES(?,?,?,?,?,?,?,?)',
+    ).run(
+      ctx.intentId,
+      ctx.userId,
+      ctx.conversationId,
+      ctx.runId,
+      payload,
+      'proposed',
+      randomUUID(),
+      new Date().toISOString(),
+    );
+  }
+  let intent = byId.get(ctx.intentId) as Intent;
+  if (!intent.bank_reference) {
+    db.prepare('UPDATE intents SET bank_reference=? WHERE id=?').run(randomUUID(), intent.id);
+    intent = byId.get(ctx.intentId) as Intent;
+  }
+  try {
+    const permission = await authorizeTransfer(ctx, input);
+    if (permission) return permission;
+  } catch (e) {
+    // The bank could not be reached, so ownership is unverified: nothing is proposed or sent.
+    if (e instanceof BankError && e.status >= 500)
+      return settle(ctx, intent, input, {
+        state: 'not_executed',
+        reason: 'not_sent',
+        error: 'The bank could not be reached before sending.',
+      });
+    throw e;
+  }
+  return propose(ctx, intent, input);
+}
+export async function confirmTransfer(userId: string, approvalId: string): Promise<ActionResult> {
+  if (person(userId)?.role !== 'customer')
+    throw new HttpError(403, 'A customer account is required.');
+  const db = appDb();
+  const approval = db
+    .prepare('SELECT * FROM approvals WHERE id=? AND user_id=?')
+    .get(approvalId, userId) as Approval | undefined;
+  if (!approval) throw new HttpError(404, 'Proposal not found.');
+  const byId = db.prepare('SELECT * FROM intents WHERE id=? AND user_id=?');
+  let intent = byId.get(approval.intent_id, userId) as Intent | undefined;
+  if (!intent) throw new HttpError(404, 'Intent not found.');
+  // What is executed is exactly what was reviewed: the stored proposal, never the request.
+  if (intent.payload !== approval.payload)
+    throw new HttpError(409, 'This proposal no longer matches its transfer.');
+  const input = transferSchema.parse(JSON.parse(approval.payload));
+  const ctx = {
+    userId,
+    conversationId: intent.conversation_id,
+    runId: randomUUID(),
+    intentId: intent.id,
+    approvalId: approval.id,
+  };
+  const now = new Date().toISOString();
+  // Single use: of two simultaneous confirmations only one consumes the proposal.
+  const won = db.transaction(() => {
+    const used =
+      db
+        .prepare(
+          'UPDATE approvals SET consumed_at=? WHERE id=? AND consumed_at IS NULL AND expires_at>?',
+        )
+        .run(now, approval.id, now).changes === 1;
+    if (used)
+      db.prepare('UPDATE intents SET status=? WHERE id=?').run('confirmed', approval.intent_id);
+    return used;
+  })();
+  if (won) {
+    recordEvent(ctx, 'transfer.confirmed', {
+      status: 'confirmed',
+      intentId: intent.id,
+      reference: intent.bank_reference,
+      approvalId: approval.id,
+    });
+    return execute(ctx, intent, input);
+  }
+  intent = byId.get(approval.intent_id, userId) as Intent;
+  const used = !!(
+    db.prepare('SELECT consumed_at FROM approvals WHERE id=?').get(approval.id) as Approval
+  ).consumed_at;
+  const base = { intentId: intent.id };
+  if (intent.status === 'cancelled')
+    return { status: 'cancelled', ...base, message: CANCELLED_MESSAGE };
+  if (!used) return { status: 'expired', ...base, message: EXPIRED_MESSAGE };
+  // Already confirmed: report the outcome of that same intent. Never a second payment.
+  if (intent.status === 'completed' && intent.operation_id)
+    return completedResult(ctx, intent, input);
+  if (intent.status === 'pending_verification') return recheck(ctx, intent, input);
+  if (intent.status === 'failed')
+    return {
+      status: 'failed',
+      error: intent.error,
+      ...base,
+      reference: intent.bank_reference,
+      message: customerMessage(
+        'resolved_not_executed',
+        await describe(userId, input, intent.bank_reference!),
+      ),
+    };
+  // Still being sent by the first confirmation: the same reference makes it the same payment.
+  if (['confirmed', 'processing'].includes(intent.status)) return execute(ctx, intent, input);
+  // A used proposal whose transfer has since been proposed again authorizes nothing.
+  return { status: 'expired', ...base, message: EXPIRED_MESSAGE };
+}
+export function cancelTransfer(userId: string, approvalId: string): ActionResult {
+  if (person(userId)?.role !== 'customer')
+    throw new HttpError(403, 'A customer account is required.');
+  const db = appDb();
+  const approval = db
+    .prepare('SELECT * FROM approvals WHERE id=? AND user_id=?')
+    .get(approvalId, userId) as Approval | undefined;
+  if (!approval) throw new HttpError(404, 'Proposal not found.');
+  // Cancelling and confirming compete for the same single use: only one can win.
+  const cancelled = db.transaction(() => {
+    const used =
+      db
+        .prepare('UPDATE approvals SET consumed_at=? WHERE id=? AND consumed_at IS NULL')
+        .run(new Date().toISOString(), approval.id).changes === 1;
+    if (used)
+      db.prepare("UPDATE intents SET status='cancelled' WHERE id=? AND status='proposed'").run(
+        approval.intent_id,
+      );
+    return used;
+  })();
+  const intent = db.prepare('SELECT * FROM intents WHERE id=?').get(approval.intent_id) as Intent;
+  if (cancelled)
+    recordEvent(
+      { userId, conversationId: intent.conversation_id, runId: randomUUID(), intentId: intent.id },
+      'transfer.cancelled',
+      { status: 'cancelled', intentId: intent.id, reference: intent.bank_reference, approvalId },
+    );
+  if (cancelled || intent.status === 'cancelled')
+    return { status: 'cancelled', intentId: intent.id, message: CANCELLED_MESSAGE };
+  throw new HttpError(409, 'This transfer was already confirmed and cannot be cancelled.');
 }

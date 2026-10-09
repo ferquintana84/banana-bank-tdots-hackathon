@@ -4,7 +4,12 @@ import { actor, sessionToken, sameOrigin, HttpError } from '../../../src/auth';
 import { people, person } from '../../../src/people';
 import { appDb } from '../../../src/db';
 import { bankRequest, BankError } from '../../../src/banking/client';
-import { transferMoney, reconcileSafely } from '../../../src/banking/actions';
+import {
+  cancelTransfer,
+  confirmTransfer,
+  identicalWarning,
+  reconcileSafely,
+} from '../../../src/banking/actions';
 import { sendMessage, answerWithEvidence } from '../../../src/agent/run';
 import { runTool } from '../../../src/agent/tools';
 import { caseDetail } from '../../../src/operator/view';
@@ -67,7 +72,11 @@ async function handler(request: Request, context: RouteContext) {
             'SELECT * FROM approvals WHERE user_id=? AND consumed_at IS NULL AND expires_at>?',
           )
           .all(current.id, new Date().toISOString()) as any[]
-      ).map((a) => ({ ...a, payload: JSON.parse(a.payload) }));
+      ).map((a) => ({
+        ...a,
+        warning: identicalWarning(current.id, a.payload, a.intent_id),
+        payload: JSON.parse(a.payload),
+      }));
       return json({ accounts, movements, contacts, approvals, transfers });
     }
     if (route === 'conversations') {
@@ -134,27 +143,10 @@ async function handler(request: Request, context: RouteContext) {
       };
       return json(await runTool(body.name, body.arguments, ctx));
     }
-    if (path[0] === 'approvals' && path[1] && path[2] === 'confirm' && request.method === 'POST') {
-      const approval = db
-        .prepare('SELECT * FROM approvals WHERE id=? AND user_id=?')
-        .get(path[1], current.id) as any;
-      if (!approval) throw new HttpError(404, 'Proposal not found.');
-      const intent = db
-        .prepare('SELECT * FROM intents WHERE id=? AND user_id=?')
-        .get(approval.intent_id, current.id) as any;
-      if (!intent) throw new HttpError(404, 'Intent not found.');
-      return json(
-        await transferMoney(
-          {
-            userId: current.id,
-            conversationId: intent.conversation_id,
-            runId: randomUUID(),
-            intentId: intent.id,
-            approvalId: approval.id,
-          },
-          JSON.parse(approval.payload),
-        ),
-      );
+    // The request body is never read: only the stored proposal can be executed.
+    if (path[0] === 'approvals' && path[1] && request.method === 'POST') {
+      if (path[2] === 'confirm') return json(await confirmTransfer(current.id, path[1]));
+      if (path[2] === 'cancel') return json(cancelTransfer(current.id, path[1]));
     }
     if (path[0] === 'incidents') {
       if (current.role !== 'operator') throw new HttpError(403, 'Operator role required.');

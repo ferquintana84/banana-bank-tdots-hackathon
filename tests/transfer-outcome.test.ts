@@ -3,8 +3,12 @@ import assert from 'node:assert/strict';
 import {
   afterLookup,
   afterSend,
+  CANCELLED_MESSAGE,
   customerMessage,
+  EXPIRED_MESSAGE,
   lookupPhase,
+  proposalMessage,
+  warningMessage,
   type Wording,
 } from '../src/banking/outcome';
 // One row per line of the state table in submission/03-fixes/01-transfer-integrity.md.
@@ -81,10 +85,20 @@ test('customer wording never says failed, and pending says not to repeat the pay
     'pending_verification',
     'resolved_completed',
     'resolved_not_executed',
-    'identical_pending',
-    'identical_completed',
   ];
-  for (const kind of kinds) assert.doesNotMatch(customerMessage(kind, details), /fail/i);
+  const texts = [
+    ...kinds.map((kind) => customerMessage(kind, details)),
+    proposalMessage(details, 10),
+    EXPIRED_MESSAGE,
+    CANCELLED_MESSAGE,
+    warningMessage('pending', 'ref-1'),
+    warningMessage('completed', 'ref-1'),
+  ];
+  for (const text of texts) assert.doesNotMatch(text, /fail/i);
+  // A proposal says plainly that no money has moved, and never states a clock time.
+  assert.match(proposalMessage(details, 10), /Nothing has been sent yet/);
+  assert.match(proposalMessage(details, 10), /expires in 10 minutes/);
+  assert.match(proposalMessage(details, 1), /expires in 1 minute\./);
   const pending = customerMessage('pending_verification', details);
   assert.match(pending, /do not send it again/);
   assert.match(pending, /ref-1/);
