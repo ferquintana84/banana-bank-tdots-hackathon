@@ -328,10 +328,15 @@ export default function Home() {
     try {
       const result = await api(`approvals/${id}/${action}`, {});
       if (g !== generation.current) return;
+      // D12: an outcome written into the conversation on screen is not repeated as a notice.
+      const shownInChat =
+        tab === 'chat' &&
+        !!result.conversationId &&
+        result.conversationId === activeConversation.current;
       // Each status in one place: a pending transfer lives in the checked-transfers panel.
       if (result.status === 'pending_verification')
         setTransfers((shown) => [...shown.filter((t) => t.intentId !== result.intentId), result]);
-      else setNotice(result.message || result.error || result.status);
+      else if (!shownInChat) setNotice(result.message || result.error || result.status);
       if (id === formProposal.current) {
         // O1: once confirmed, the form no longer holds a payment that one click would repeat.
         if (action === 'confirm') {
@@ -849,7 +854,7 @@ export default function Home() {
                         {a.warning && (
                           <p className="proposal-warning" role="alert">
                             {a.warning.kind === 'completed'
-                              ? `You already completed an identical transfer at ${date(a.warning.at)} (reference ${a.warning.reference}). If you confirm, this will be a second, separate payment.`
+                              ? `You already completed an identical transfer on ${date(a.warning.at)} (reference ${a.warning.reference}). If you confirm, this will be a second, separate payment.`
                               : a.warning.text}
                           </p>
                         )}

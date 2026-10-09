@@ -125,7 +125,9 @@ test('the agent is told which proposals are waiting, expired or cancelled', () =
   assert.doesNotMatch(lines, /completed/);
 });
 test('a cancellation is written back to the conversation it came from', () => {
-  cancelTransfer('lucia', seed('noted', { conversationId: 'conv-note' }));
+  const result = cancelTransfer('lucia', seed('noted', { conversationId: 'conv-note' }));
+  // The page uses this to avoid repeating what the conversation already shows (D12).
+  assert.equal(result.conversationId, 'conv-note');
   assert.deepEqual(
     messages('conv-note').map((m) => m.content),
     ['You cancelled this transfer. Nothing was sent.'],
@@ -133,7 +135,9 @@ test('a cancellation is written back to the conversation it came from', () => {
 });
 test('a proposal without a conversation writes nothing and does not break', () => {
   const before = (appDb().prepare('SELECT COUNT(*) n FROM messages').get() as { n: number }).n;
-  assert.equal(cancelTransfer('lucia', seed('silent')).status, 'cancelled');
+  const result = cancelTransfer('lucia', seed('silent'));
+  assert.equal(result.status, 'cancelled');
+  assert.equal(result.conversationId, undefined);
   assert.equal(
     (appDb().prepare('SELECT COUNT(*) n FROM messages').get() as { n: number }).n,
     before,

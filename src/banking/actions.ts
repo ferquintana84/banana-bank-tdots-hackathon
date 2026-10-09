@@ -91,13 +91,15 @@ const tracer =
 // What the customer did in the app, and what the bank verified, belongs in the conversation
 // where the transfer was asked for: otherwise the chat ends at "please confirm".
 function noteInConversation(intent: Intent, text: string) {
-  if (!intent.conversation_id) return;
+  if (!intent.conversation_id) return false;
   try {
     appDb()
       .prepare('INSERT INTO messages VALUES(?,?,?,?,?,?)')
       .run(randomUUID(), intent.conversation_id, 'assistant', text, new Date().toISOString(), null);
+    return true;
   } catch (e) {
     logFailure('conversation_note_failed', e);
+    return false;
   }
 }
 // Stores the outcome and builds what the customer is told.
@@ -532,11 +534,12 @@ export async function confirmTransfer(userId: string, approvalId: string): Promi
       approvalId: approval.id,
     });
     const result = await execute(ctx, intent, input);
-    noteInConversation(
+    const noted = noteInConversation(
       intent,
       `You confirmed this transfer in the app. ${String(result.message ?? '')}`.trim(),
     );
-    return result;
+    // The page uses this to avoid repeating what the conversation already shows (D12).
+    return noted ? { ...result, conversationId: intent.conversation_id } : result;
   }
   intent = byId.get(approval.intent_id, userId) as Intent;
   const used = !!(
@@ -587,15 +590,19 @@ export function cancelTransfer(userId: string, approvalId: string): ActionResult
     return used;
   })();
   const intent = db.prepare('SELECT * FROM intents WHERE id=?').get(approval.intent_id) as Intent;
-  if (cancelled) {
+  const noted = cancelled && noteInConversation(intent, CANCELLED_MESSAGE);
+  if (cancelled)
     recordEvent(
       { userId, conversationId: intent.conversation_id, runId: randomUUID(), intentId: intent.id },
       'transfer.cancelled',
       { status: 'cancelled', intentId: intent.id, reference: intent.bank_reference, approvalId },
     );
-    noteInConversation(intent, CANCELLED_MESSAGE);
-  }
   if (cancelled || intent.status === 'cancelled')
-    return { status: 'cancelled', intentId: intent.id, message: CANCELLED_MESSAGE };
+    return {
+      status: 'cancelled',
+      intentId: intent.id,
+      message: CANCELLED_MESSAGE,
+      ...(noted ? { conversationId: intent.conversation_id } : {}),
+    };
   throw new HttpError(409, 'This transfer was already confirmed and cannot be cancelled.');
 }
