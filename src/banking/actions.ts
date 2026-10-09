@@ -208,7 +208,8 @@ export async function reconcileIntents(userId: string, reference?: string) {
 export const reconcileSafely = (userId: string, reference?: string) =>
   reconcileIntents(userId, reference).catch((e) => {
     logFailure('reconcile_failed', e);
-    return [] as Awaited<ReturnType<typeof reconcileIntents>>;
+    // null, not an empty list: "the check failed" is not "nothing to report".
+    return null;
   });
 // Verified status of the transfers already requested in a conversation, for the agent's context.
 export function conversationTransfers(userId: string, conversationId: string) {

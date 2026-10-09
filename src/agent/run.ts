@@ -47,7 +47,7 @@ export async function sendMessage(userId: string, conversationId: string, conten
   );
   try {
     const sources = await searchDocuments(content);
-    const checked = await reconcileSafely(userId);
+    const checked = (await reconcileSafely(userId)) ?? [];
     const requested = conversationTransfers(userId, conversationId);
     const history = db
       .prepare(

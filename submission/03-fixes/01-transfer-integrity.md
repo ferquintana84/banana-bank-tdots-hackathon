@@ -157,4 +157,6 @@ La primera ejecución de la parte (b) pasó la comprobación de tipos y las 18 p
 - **Quién lo detectó.** El script de reproducción. Los tipos y las pruebas no podían: ninguna prueba ejecutaba esa consulta. La evidencia por historias de cliente encontró lo que las comprobaciones aisladas dejaban pasar.
 - **Qué cambiamos.** Los parámetros de la consulta; un registro de cada fallo absorbido, solo con el nombre del error y nunca con datos ni secretos; y una prueba (`tests/reconcile.test.ts`) que ejecuta la consulta y que fallaba antes de la corrección. Una comprobación silenciosa ya no puede pasar inadvertida.
 
+- **La misma lección, otra vez.** Al corregir la interfaz tras la prueba humana vimos que, si la comprobación fallaba, el servidor respondía con una lista vacía, y la pantalla habría borrado un aviso de «pendiente» sin decir nada. Ahora responde «la comprobación ha fallado» (`null`), que no es lo mismo que «no hay nada que contar», y la pantalla conserva lo que mostraba (D10).
+
 Conecta directamente con la tesis: un sistema que falla en silencio también está afirmando algo que no puede verificar. Aquí afirmaba «no hay nada que conciliar» cuando en realidad no había mirado.

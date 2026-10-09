@@ -113,14 +113,16 @@ export default function Home() {
     if (g !== generation.current) return;
     setDashboard(data);
     // Each load lists every transfer still pending; ones resolved earlier stay visible.
-    const checked: AnyRecord[] = data.transfers || [];
-    setTransfers((shown) => [
-      ...shown.filter(
-        (t) =>
-          t.status !== 'pending_verification' && !checked.some((c) => c.intentId === t.intentId),
-      ),
-      ...checked,
-    ]);
+    // null means the check itself failed: keep what is shown instead of dropping it.
+    const checked: AnyRecord[] | null | undefined = data.transfers;
+    if (checked)
+      setTransfers((shown) => [
+        ...shown.filter(
+          (t) =>
+            t.status !== 'pending_verification' && !checked.some((c) => c.intentId === t.intentId),
+        ),
+        ...checked,
+      ]);
     if (data.accounts?.length)
       setFrom((v) => (data.accounts.some((a: AnyRecord) => a.id === v) ? v : data.accounts[0].id));
   }
@@ -169,6 +171,10 @@ export default function Home() {
   useEffect(() => {
     messagesEnd.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [messages, busy]);
+  // A notice belongs to the page where it appeared.
+  useEffect(() => {
+    setNotice('');
+  }, [tab]);
   async function openConversation(id: string) {
     const g = generation.current;
     activeConversation.current = id;
@@ -271,14 +277,19 @@ export default function Home() {
       });
       if (g !== generation.current) return;
       if (result.status !== 'pending_verification') transferIntent.current = '';
-      setNotice(
-        result.message ||
-          (result.status === 'completed'
-            ? 'Transfer completed. You can check it in your activity.'
-            : result.status === 'requires_confirmation'
-              ? 'Review the proposal to confirm the transfer.'
-              : result.error || 'The operation is still pending.'),
-      );
+      // A pending transfer is shown only in the checked-transfers panel, where the same
+      // intent is replaced once the bank answers. A notice would go stale and contradict it.
+      if (result.status === 'pending_verification')
+        setTransfers((shown) => [...shown.filter((t) => t.intentId !== result.intentId), result]);
+      else
+        setNotice(
+          result.message ||
+            (result.status === 'completed'
+              ? 'Transfer completed. You can check it in your activity.'
+              : result.status === 'requires_confirmation'
+                ? 'Review the proposal to confirm the transfer.'
+                : result.error || 'The operation is still pending.'),
+        );
       await refresh(g);
     } catch (e) {
       if (g === generation.current) setError((e as Error).message);
