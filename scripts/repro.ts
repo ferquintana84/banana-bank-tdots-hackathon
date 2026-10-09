@@ -131,6 +131,22 @@ async function confirm(userId: string, transfer: Transfer, result: Reply): Promi
 }
 const send = async (userId: string, transfer: Transfer, intentId?: string) =>
   confirm(userId, transfer, await request(userId, transfer, intentId));
+const confirmAs = (userId: string, approvalId: string, body: unknown = {}) =>
+  app(userId, `approvals/${approvalId}/confirm`, body);
+// Asks for a transfer and stops at the proposal, without confirming it.
+async function proposeOnly(userId: string, transfer: Transfer) {
+  const reply = await request(userId, transfer);
+  return { reply, id: reply.data.approval?.id as string | undefined };
+}
+// Without a proposal there is nothing to review: the money has already moved, or nothing was offered.
+async function noProposal(reply: Reply, transfer: Transfer): Promise<Outcome> {
+  const e = await effects(transfer, 'lucia', 'bruno');
+  return {
+    said: `${said(reply)} · no hay ninguna propuesta que revisar`,
+    bank: e.text,
+    pass: false,
+  };
+}
 const said = (r: Reply) => {
   const status = r.data.status ? `\`${r.data.status}\`` : `HTTP ${r.http}`;
   return r.data.error ? `${status} · «${r.data.error}»` : status;
@@ -378,22 +394,26 @@ const cases: Case[] = [
   {
     id: 'R15',
     story:
-      'A Lucía le dicen que su pago de 10 EUR a Bruno está pendiente de verificar y lo pide otra vez: ¿se evita un segundo pago y se le explica?',
+      'Con un pago de 10 EUR a Bruno pendiente de verificar, Lucía pide otro idéntico: ¿se le avisa antes de pagar dos veces?',
     scenario: 'read-unavailable',
-    contract: 'La petición idéntica no envía un segundo pago y el cliente recibe una explicación.',
+    contract:
+      'La segunda petición no mueve dinero por sí sola y su propuesta lleva una advertencia (D11).',
     run: async () => {
       await prepare('read-unavailable');
       const transfer = toBruno('R15');
       const first = await send('lucia', transfer);
-      // A new request without intentId: a distinct intent with identical details (D8).
-      const second = await send('lucia', transfer);
+      // A new request without intentId and without confirming: a distinct, identical intent.
+      const second = await request('lucia', transfer);
       const e = await effects(transfer, 'lucia', 'bruno');
-      const message = String(second.data.message ?? '');
+      const warning = second.data.approval?.warning?.text;
       return {
-        said: `1.ª petición: ${said(first)} · 2.ª petición idéntica: ${said(second)} · «${message || 'sin mensaje'}»`,
+        said: `1.ª petición: ${said(first)} · 2.ª petición idéntica, sin confirmar: ${said(second)} · advertencia: ${warning ? `«${warning}»` : 'ninguna'}`,
         bank: e.text,
         pass:
-          e.debits === 1 && e.credits === 1 && !failed(second) && /have not sent/i.test(message),
+          second.data.status === 'requires_confirmation' &&
+          typeof warning === 'string' &&
+          e.debits === 1 &&
+          e.credits === 1,
       };
     },
   },
@@ -452,6 +472,102 @@ const cases: Case[] = [
           find('transfer.bank_answer', 'lookup')?.bankStatus === 200 &&
           !!outcome?.reference &&
           !!outcome?.operationId,
+      };
+    },
+  },
+  {
+    id: 'R18',
+    story: 'Lucía pulsa confirmar dos veces seguidas en su pago de 10 EUR: ¿paga una sola vez?',
+    scenario: 'normal',
+    contract: 'Confirmar dos veces a la vez, y una tercera después, produce un solo cargo.',
+    run: async () => {
+      await prepare('normal');
+      const transfer = toBruno('R18');
+      const proposal = await proposeOnly('lucia', transfer);
+      if (!proposal.id) return noProposal(proposal.reply, transfer);
+      const replies = await Promise.all([
+        confirmAs('lucia', proposal.id),
+        confirmAs('lucia', proposal.id),
+      ]);
+      replies.push(await confirmAs('lucia', proposal.id));
+      const e = await effects(transfer, 'lucia', 'bruno');
+      const operations = new Set(replies.map((r) => r.data.operation?.id).filter(Boolean));
+      return {
+        said: `confirmaciones: ${replies.map(said).join(' / ')} · operaciones distintas: ${operations.size}`,
+        bank: e.text,
+        pass: e.debits === 1 && e.credits === 1 && operations.size === 1 && !replies.some(failed),
+      };
+    },
+  },
+  {
+    id: 'R20',
+    story: 'Bruno intenta confirmar la propuesta de pago de Lucía: ¿se le impide?',
+    scenario: 'normal',
+    contract: 'Otra persona recibe 404 y no se mueve dinero; la titular aún puede confirmar.',
+    run: async () => {
+      await prepare('normal');
+      const transfer = toBruno('R20');
+      const proposal = await proposeOnly('lucia', transfer);
+      if (!proposal.id) return noProposal(proposal.reply, transfer);
+      const foreign = await confirmAs('bruno', proposal.id);
+      const afterForeign = (await effects(transfer, 'lucia', 'bruno')).debits;
+      const own = await confirmAs('lucia', proposal.id);
+      const e = await effects(transfer, 'lucia', 'bruno');
+      return {
+        said: `Bruno: ${said(foreign)} · después Lucía: ${said(own)}`,
+        bank: `tras el intento de Bruno: ${afterForeign} cargo(s) · al final: ${e.text}`,
+        pass: foreign.http === 404 && afterForeign === 0 && e.debits === 1 && !failed(own),
+      };
+    },
+  },
+  {
+    id: 'R21',
+    story:
+      'Alguien altera la confirmación para enviar 9.999 EUR a Diego: ¿se ejecuta solo lo que Lucía revisó?',
+    scenario: 'normal',
+    contract: 'Se ejecuta exactamente la propuesta: 10,00 EUR a Bruno y nada a nadie más.',
+    run: async () => {
+      await prepare('normal');
+      const transfer = toBruno('R21');
+      const proposal = await proposeOnly('lucia', transfer);
+      if (!proposal.id) return noProposal(proposal.reply, transfer);
+      const before = (await ledger('lucia', 'acc-lucia', transfer.concept)).balance;
+      const tampered = { ...transfer, toAccountId: 'acc-diego', amountCents: 999900 };
+      const reply = await confirmAs('lucia', proposal.id, {
+        ...tampered,
+        arguments: tampered,
+        payload: tampered,
+      });
+      const e = await effects(transfer, 'lucia', 'bruno');
+      const charged = before - (await ledger('lucia', 'acc-lucia', transfer.concept)).balance;
+      const toDiego = (await ledger('diego', 'acc-diego', transfer.concept)).entries.length;
+      return {
+        said: said(reply),
+        bank: `${e.text} · cargado a Lucía: ${eur(charged)} · abonos a Diego: ${toDiego}`,
+        pass: e.debits === 1 && e.credits === 1 && charged === 1000 && toDiego === 0,
+      };
+    },
+  },
+  {
+    id: 'R22',
+    story: 'Lucía cancela su propuesta de pago y después llega una confirmación: ¿se envía algo?',
+    scenario: 'normal',
+    contract: 'Una propuesta cancelada no se puede confirmar: ningún cargo.',
+    run: async () => {
+      await prepare('normal');
+      const transfer = toBruno('R22');
+      const proposal = await proposeOnly('lucia', transfer);
+      if (!proposal.id) return noProposal(proposal.reply, transfer);
+      const cancelled = await app('lucia', `approvals/${proposal.id}/cancel`, {});
+      const late = await confirmAs('lucia', proposal.id);
+      const e = await effects(transfer, 'lucia', 'bruno');
+      return {
+        said: `cancelar: ${said(cancelled)} · confirmar después: ${said(late)}`,
+        bank: e.text,
+        pass:
+          cancelled.data.status === 'cancelled' &&
+          late.data.status === 'cancelled' &&
+          e.debits === 0,
       };
     },
   },
