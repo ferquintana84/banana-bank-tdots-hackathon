@@ -128,9 +128,12 @@ Comprobaciones nuevas, además del script: una función pura que traduce «respu
 | R4 | CUMPLE | CUMPLE | La segunda llamada devuelve la misma operación. |
 | R13 | CUMPLE | CUMPLE | Primera respuesta `pending_verification`; al repetir, `completed`; un cargo. |
 | R14 | CUMPLE | CUMPLE | Ya cumple antes de la corrección; vigila que `reject-before` no se rompa. |
+| R15 | CUMPLE | CUMPLE | Evidencia propia de D8: una petición idéntica mientras otra está pendiente no envía un segundo pago y lo explica. |
 | R8 | NO CUMPLE | CUMPLE | Necesita la conciliación de intenciones antiguas. |
 | R5 | NO CUMPLE | NO CUMPLE | Es de Fix 2. |
 | R10 | NO CUMPLE | NO CUMPLE | Fuera de las prioridades; con (c) mejora su línea informativa. |
+
+**Nota sobre R15.** Este caso se añadió al script después de registrar la línea base, cuando la parte (a) ya estaba aplicada, por lo que `evidence/baseline.md` no lo incluye. Con el simulador solo se puede reproducir la rama en la que la consulta resuelve la transferencia pendiente como completada: el escenario `read-unavailable` falla una única consulta. La rama en la que la pendiente sigue sin resolverse no tiene reproducción.
 
 ### Riesgos de regresión (segundo orden)
 

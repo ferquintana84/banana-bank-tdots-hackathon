@@ -373,6 +373,28 @@ const cases: Case[] = [
       return singlePayment('R14');
     },
   },
+  {
+    id: 'R15',
+    story:
+      'A Lucía le dicen que su pago de 10 EUR a Bruno está pendiente de verificar y lo pide otra vez: ¿se evita un segundo pago y se le explica?',
+    scenario: 'read-unavailable',
+    contract: 'La petición idéntica no envía un segundo pago y el cliente recibe una explicación.',
+    run: async () => {
+      await prepare('read-unavailable');
+      const transfer = toBruno('R15');
+      const first = await send('lucia', transfer);
+      // A new request without intentId: a distinct intent with identical details (D8).
+      const second = await send('lucia', transfer);
+      const e = await effects(transfer, 'lucia', 'bruno');
+      const message = String(second.data.message ?? '');
+      return {
+        said: `1.ª petición: ${said(first)} · 2.ª petición idéntica: ${said(second)} · «${message || 'sin mensaje'}»`,
+        bank: e.text,
+        pass:
+          e.debits === 1 && e.credits === 1 && !failed(second) && /have not sent/i.test(message),
+      };
+    },
+  },
 ];
 
 const cell = (value: string) => value.replace(/\|/g, '\\|').replace(/\s+/g, ' ');
@@ -408,7 +430,7 @@ const report = [
   '',
   `- **Etiqueta:** ${label ?? 'sin etiqueta'}`,
   `- **Fecha:** ${new Date().toISOString()}`,
-  `- **Commit:** ${git('rev-parse', '--short', 'HEAD')}${git('status', '--porcelain') ? ' (con cambios sin confirmar)' : ''}`,
+  `- **Commit:** ${git('rev-parse', '--short', 'HEAD')}${git('status', '--porcelain', '--', '.', ':!submission/03-fixes/evidence') ? ' (con cambios sin confirmar)' : ''}`,
   `- **Node:** ${process.version}`,
   `- **Resultado:** ${met} de ${total} casos cumplen el contrato.`,
   '',
