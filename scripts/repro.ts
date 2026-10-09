@@ -571,6 +571,35 @@ const cases: Case[] = [
       };
     },
   },
+  {
+    id: 'R23',
+    story:
+      'Lucía confirma un pago de 10 EUR que nació en una conversación: ¿queda el resultado escrito en esa conversación?',
+    scenario: 'normal',
+    contract: 'La conversación recoge el resultado verificado, con la referencia del banco.',
+    run: async () => {
+      await prepare('normal');
+      const transfer = toBruno('R23');
+      const conversationId = (await app('lucia', 'conversations', {})).data.id as string;
+      const proposal = await app('lucia', 'actions', {
+        name: 'transfer_money',
+        arguments: transfer,
+        conversationId,
+      });
+      const result = await confirm('lucia', transfer, proposal);
+      const messages = ((await app('lucia', `conversations/${conversationId}`)).data.messages ??
+        []) as { role: string; content: string }[];
+      const reference = String(result.data.reference ?? '');
+      const written = messages.find((m) => reference && m.content.includes(reference));
+      return {
+        said: `${said(result)} · mensajes en la conversación: ${messages.length}`,
+        bank: written
+          ? `En la conversación: «${written.content}»`
+          : 'En la conversación: ningún mensaje con el resultado',
+        pass: result.data.status === 'completed' && !!written,
+      };
+    },
+  },
 ];
 
 const cell = (value: string) => value.replace(/\|/g, '\\|').replace(/\s+/g, ' ');
