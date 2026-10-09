@@ -3,6 +3,7 @@
 - **Autor:** Fernando (observación humana).
 - **Fecha:** 2026-10-09.
 - **Estado:** observaciones **no verificadas**. Se anotaron usando la aplicación antes de leer el código. Ninguna cuenta como hallazgo hasta que tenga evidencia (`archivo:línea`, reproducción o test) en `01-diagnosis.md`.
+- **Capturas:** `evidencia/01-overview-lucia.png` se volvió a capturar el 2026-10-09 por privacidad, sin la barra de marcadores del navegador. Su contenido es el mismo.
 
 ## 1. Instalación
 
