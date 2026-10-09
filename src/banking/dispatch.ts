@@ -5,13 +5,19 @@ export type Outcome =
   | { state: 'completed'; operation: Operation }
   | { state: 'not_executed'; reason: Reason; error: string }
   | { state: 'pending_verification'; anomaly: boolean };
-type Answer = { status: number; operation?: Operation; error?: string };
+// Reports each bank answer as it happens. null means no answer arrived at all.
+export type Trace = (step: 'send' | 'lookup', bankStatus: number | null) => void;
+type Answer = { status: number; received: boolean; operation?: Operation; error?: string };
 async function ask(userId: string, path: string, method = 'GET', body?: unknown): Promise<Answer> {
   try {
-    return { status: 200, operation: await bankRequest<Operation>(userId, path, method, body) };
+    return {
+      status: 200,
+      received: true,
+      operation: await bankRequest<Operation>(userId, path, method, body),
+    };
   } catch (e) {
     if (!(e instanceof BankError)) throw e;
-    return { status: e.status, error: e.message };
+    return { status: e.status, received: !e.noResponse, error: e.message };
   }
 }
 const same = (op: Operation, input: TransferInput) =>
@@ -25,8 +31,10 @@ export async function verifyTransfer(
   input: TransferInput,
   reference: string,
   phase: LookupPhase,
+  trace?: Trace,
 ): Promise<Outcome | 'resend'> {
   const found = await ask(userId, `/v1/operations/${encodeURIComponent(reference)}`);
+  trace?.('lookup', found.received ? found.status : null);
   const step = afterLookup(found.status, !!found.operation && same(found.operation, input), phase);
   if (step.next === 'completed') return { state: 'completed', operation: found.operation! };
   if (step.next === 'not_executed')
@@ -44,10 +52,12 @@ export async function dispatchTransfer(
   input: TransferInput,
   reference: string,
   beforeSend: () => void,
+  trace: Trace,
 ): Promise<Outcome> {
   for (let phase: LookupPhase = 'first'; ; phase = 'unsettled') {
     beforeSend();
     const sent = await ask(userId, '/v1/transfers', 'POST', { ...input, reference });
+    trace('send', sent.received ? sent.status : null);
     const step = afterSend(sent.status);
     if (step.next === 'completed') return { state: 'completed', operation: sent.operation! };
     if (step.next === 'not_executed')
@@ -58,7 +68,7 @@ export async function dispatchTransfer(
       };
     if (step.next === 'pending_verification')
       return { state: 'pending_verification', anomaly: step.anomaly };
-    const verified = await verifyTransfer(userId, input, reference, phase);
+    const verified = await verifyTransfer(userId, input, reference, phase, trace);
     if (verified !== 'resend') return verified;
   }
 }

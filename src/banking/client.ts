@@ -4,6 +4,8 @@ export class BankError extends Error {
   constructor(
     public status: number,
     message: string,
+    // True when no answer arrived at all (timeout or network error).
+    public noResponse = false,
   ) {
     super(message);
   }
@@ -32,7 +34,7 @@ export async function bankRequest<T>(
       cache: 'no-store',
     });
   } catch {
-    throw new BankError(504, 'No response received from the bank.');
+    throw new BankError(504, 'No response received from the bank.', true);
   }
   let data: any;
   try {

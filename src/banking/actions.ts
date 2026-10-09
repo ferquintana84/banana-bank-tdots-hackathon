@@ -5,7 +5,7 @@ import { HttpError } from '../auth';
 import { person } from '../people';
 import { authorizeTransfer } from './authorization';
 import { bankRequest, BankError } from './client';
-import { dispatchTransfer, verifyTransfer, type Outcome } from './dispatch';
+import { dispatchTransfer, verifyTransfer, type Outcome, type Trace } from './dispatch';
 import { customerMessage, lookupPhase, SETTLE_MS, type Wording } from './outcome';
 import { recordEvent } from '../telemetry';
 import type { Account, ActionResult, ToolContext, TransferInput } from '../types';
@@ -59,6 +59,15 @@ async function describe(userId: string, input: TransferInput, reference: string)
   } catch {}
   return details;
 }
+const tracer =
+  (ctx: ToolContext, intent: Intent): Trace =>
+  (step, bankStatus) =>
+    recordEvent(ctx, 'transfer.bank_answer', {
+      intentId: intent.id,
+      reference: intent.bank_reference,
+      step,
+      bankStatus,
+    });
 // Stores the outcome and builds what the customer is told.
 async function settle(
   ctx: ToolContext,
@@ -79,8 +88,9 @@ async function settle(
     );
     recordEvent(ctx, 'transfer.completed', {
       status: 'completed',
-      operation: outcome.operation,
       intentId: intent.id,
+      reference,
+      operationId: outcome.operation.id,
     });
     return {
       status: 'completed',
@@ -97,8 +107,9 @@ async function settle(
     );
     recordEvent(ctx, 'transfer.failed', {
       status: 'failed',
-      error: outcome.error,
+      reason: outcome.reason,
       intentId: intent.id,
+      reference,
     });
     return {
       status: 'failed',
@@ -112,7 +123,12 @@ async function settle(
     'pending_verification',
     intent.id,
   );
-  recordEvent(ctx, 'transfer.pending', { status: 'pending_verification', intentId: intent.id });
+  recordEvent(ctx, 'transfer.pending', {
+    status: 'pending_verification',
+    reason: outcome.anomaly ? 'anomaly' : undefined,
+    intentId: intent.id,
+    reference,
+  });
   return {
     status: 'pending_verification',
     needsReview: outcome.anomaly,
@@ -129,6 +145,7 @@ async function recheck(ctx: ToolContext, intent: Intent, input: TransferInput, i
       input,
       intent.bank_reference!,
       lookupPhase(intent.last_sent_at ?? intent.created_at),
+      tracer(ctx, intent),
     );
     if (verified !== 'resend') outcome = verified;
   } catch (e) {
@@ -223,7 +240,13 @@ export async function transferMoney(ctx: ToolContext, args: unknown): Promise<Ac
   // Same intent again: a completed one returns its verified result, a pending one is rechecked.
   if (previous?.status === 'completed' && previous.operation_id) {
     const reference = previous.bank_reference!;
-    const found = await verifyTransfer(ctx.userId, input, reference, 'unsettled').catch(() => null);
+    const found = await verifyTransfer(
+      ctx.userId,
+      input,
+      reference,
+      'unsettled',
+      tracer(ctx, previous),
+    ).catch(() => null);
     return {
       status: 'completed',
       operation:
@@ -285,13 +308,22 @@ export async function transferMoney(ctx: ToolContext, args: unknown): Promise<Ac
     throw e;
   }
   db.prepare('UPDATE intents SET status=? WHERE id=?').run('processing', intent.id);
-  recordEvent(ctx, 'transfer.started', { status: 'processing', input, intentId: intent.id });
+  recordEvent(ctx, 'transfer.started', {
+    status: 'processing',
+    intentId: intent.id,
+    reference: intent.bank_reference,
+  });
   let outcome: Outcome;
   try {
-    outcome = await dispatchTransfer(ctx.userId, input, intent.bank_reference!, () =>
-      db
-        .prepare('UPDATE intents SET last_sent_at=? WHERE id=?')
-        .run(new Date().toISOString(), intent.id),
+    outcome = await dispatchTransfer(
+      ctx.userId,
+      input,
+      intent.bank_reference!,
+      () =>
+        db
+          .prepare('UPDATE intents SET last_sent_at=? WHERE id=?')
+          .run(new Date().toISOString(), intent.id),
+      tracer(ctx, intent),
     );
   } catch (e) {
     logFailure('transfer_dispatch_failed', e);
