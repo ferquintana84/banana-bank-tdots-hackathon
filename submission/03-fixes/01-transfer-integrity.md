@@ -1,9 +1,43 @@
 # Fix 1. Integridad de la transferencia ante la incertidumbre
 
-- **Estado:** diseño aprobado. Implementación en tres partes: (a), (b) y (c).
+- **Estado:** implementado y verificado. Partes (a), (b) y (c), más un ajuste de interfaz tras la prueba humana.
 - **Hallazgos que corrige:** H1, H2 y H3 de `01-diagnosis.md` (reglas 4 y 5 del contrato).
 - **Evidencia «antes»:** `evidence/baseline.md` (R1, R2, R3, R4, R7, R8 y R13 no cumplen).
+- **Evidencia «después»:** `evidence/after-fix-1-ui.md` y la prueba de aceptación humana (`01-acceptance-checklist.md`).
 - **Regla de diseño:** solo un hecho verificado en el banco produce «completada» o «no ejecutada». La incertidumbre produce siempre «pendiente de verificar», nunca «fallida».
+
+## Resultado: antes y después
+
+El mismo script (`npm run repro`) se ejecutó antes y después de cada parte. Cada caso se juzga contra el contrato, no contra el comportamiento del momento.
+
+| Momento | Casos que cumplen | Evidencia | Código |
+|---|---|---|---|
+| Línea base, sin tocar la aplicación | 2 de 11 | `evidence/baseline.md` | — |
+| Tras la parte (a), núcleo | 9 de 12 | `evidence/after-fix-1a.md` | `1a11187` |
+| Tras la parte (b), conciliación al leer | 11 de 13 | `evidence/after-fix-1b.md` | `315f889` |
+| Tras la parte (c), evidencia por paso | 12 de 14 | `evidence/after-fix-1c.md` | `0e45790` |
+| Tras el ajuste de interfaz (O2 y O3) | 12 de 14 | `evidence/after-fix-1-ui.md` | `82f4856` |
+
+Cómo leer la tabla:
+
+- **La línea base tiene dos casos en verde por diseño:** R0 (las pruebas públicas ya pasaban) y R14 (`reject-before` ya funcionaba y se vigila como regresión). La primera línea base, antes de añadir R14, fue de 1 de 10.
+- **El número de casos crece** porque R15, R16 y R17 se añadieron durante el trabajo. R16 y R17 se registraron en rojo antes de escribir el código que los corrige (`evidence/before-fix-1b-r16.md` y `evidence/before-fix-1c-r17.md`). R15 se añadió con la parte (a) ya aplicada y no tiene registro previo.
+- **Los dos casos que siguen sin cumplir son los previstos:** R5 (revisión antes de ejecutar, que es Fix 2) y R10 (vista de operador, fuera de las prioridades).
+
+Lo que cambió para el cliente, en los casos de la línea base:
+
+| Historia | Antes | Después |
+|---|---|---|
+| Lucía envía 10 EUR y se pierde la respuesta del banco (R1) | Paga 20 EUR y lee «completada» | Paga 10 EUR |
+| Tres pagos iguales en un día con incidencias (R2) | 40 EUR cargados | 30 EUR cargados |
+| Se reenvía la misma orden tras un corte de red (R4) | Dos operaciones | La misma operación, un cargo |
+| Diego envía 50 de sus 75 EUR y se pierde la respuesta (R7) | Lee «Insufficient funds.» con el dinero ya fuera | Lee que está completada |
+| El pago histórico de 85 EUR de Lucía (R8) | La aplicación guarda «fallida»; el banco, «completada» | Coinciden, y se le informa al abrir sus cuentas |
+| Se pierde la respuesta y el banco no deja consultar (R13) | Tres cargos | «Pendiente de verificar» y después «completada»; un cargo |
+
+**Prueba de aceptación humana.** Fernando la ejecutó en el navegador el 2026-10-09: formulario y chat, con respuesta perdida y con el banco sin consulta. Las cuatro secciones se superaron, con cuatro transferencias y ningún cargo duplicado. De ella salieron tres observaciones que ningún script comprueba: dos se corrigieron y se volvieron a verificar (O2 y O3), y una queda para Fix 2 (O1). Resultados y capturas: `01-acceptance-checklist.md`.
+
+**Lo que esta evidencia no cubre.** El texto del chat lo redacta el modelo y puede variar. La rama en la que una transferencia sigue pendiente tras una segunda consulta no se puede reproducir con el simulador. El dinero aún sale sin confirmación previa, que es lo que corrige Fix 2.
 
 ## 1. Estados de una intención de transferencia
 
@@ -129,6 +163,8 @@ Comprobaciones nuevas, además del script: una función pura que traduce «respu
 | R13 | CUMPLE | CUMPLE | Primera respuesta `pending_verification`; al repetir, `completed`; un cargo. |
 | R14 | CUMPLE | CUMPLE | Ya cumple antes de la corrección; vigila que `reject-before` no se rompa. |
 | R15 | CUMPLE | CUMPLE | Evidencia propia de D8: una petición idéntica mientras otra está pendiente no envía un segundo pago y lo explica. |
+| R16 | NO CUMPLE | CUMPLE | Añadido con la parte (b): al abrir las cuentas se informa del resultado de una transferencia pendiente. |
+| R17 | NO CUMPLE | NO CUMPLE | Añadido con la parte (c), que es la que lo hace cumplir: queda constancia de cada paso. |
 | R8 | NO CUMPLE | CUMPLE | Necesita la conciliación de intenciones antiguas. |
 | R5 | NO CUMPLE | NO CUMPLE | Es de Fix 2. |
 | R10 | NO CUMPLE | NO CUMPLE | Fuera de las prioridades; con (c) mejora su línea informativa. |
