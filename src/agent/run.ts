@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { ResponseInputItem } from 'openai/resources/responses/responses';
 import { toResponseInputItems } from 'openai/lib/responses/ResponseInputItems';
 import { openai } from '../retrieval/embeddings';
-import { searchDocuments } from '../retrieval/search';
+import { searchDocuments, sourcesForAnswer } from '../retrieval/search';
 import { knowledgeInstructions } from './prompt';
 import { toolDefinitions, runTool } from './tools';
 import { conversationTransfers, intentKey, reconcileSafely } from '../banking/actions';
@@ -46,7 +46,7 @@ export async function sendMessage(userId: string, conversationId: string, conten
     runId,
   );
   try {
-    const sources = await searchDocuments(content);
+    const sources = sourcesForAnswer(await searchDocuments(content));
     const checked = (await reconcileSafely(userId)) ?? [];
     const requested = conversationTransfers(userId, conversationId);
     const history = db

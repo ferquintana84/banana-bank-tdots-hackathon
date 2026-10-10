@@ -72,6 +72,7 @@ El texto de la respuesta se sigue guardando como texto. La evidencia se guarda a
 
 Dos datos que justifican este alcance:
 
+- **Un fragmento cuyo documento no está en el manifiesto se descarta.** Es una elección declarada: si no se puede comprobar su vigencia, no se muestra como vigente.
 - **No hace falta regenerar el índice.** Los metadatos correctos ya están en `fixtures/documents/manifest.json`; basta con unirlos al buscar. No consume cuota de embeddings y sigue funcionando con un índice suministrado por otro.
 - **Los fragmentos cortan el texto a ciegas.** En 36 de los 80 documentos, la sección «Terms and exceptions» queda repartida entre dos fragmentos, y los cortes caen a media palabra. Los documentos miden unos 2.700 caracteres de media, así que dar el documento completo de las pocas fuentes recuperadas es barato.
 
@@ -183,11 +184,13 @@ R24 y R25 usan `POST /api/search` con el texto exacto de un fragmento como consu
 
 | Pregunta | Criterios de seguridad (3 de 3) | Criterios de completitud (2 de 3) |
 |---|---|---|
-| P1 | No cita ningún documento archivado. Ningún importe verificado que no esté en su fuente. | Cita un documento Aurora en vigor y el movimiento `movement-lucia-0`. Tiene una afirmación no verificada sobre las compras. Tiene siguiente paso. |
+| P1 | No cita ningún documento archivado. Ningún importe verificado que no esté en su fuente. Ninguna afirmación verificada trata la descripción de un movimiento como tipo de pago ni como estado (por ejemplo, «compra con tarjeta» o «liquidada»). | Cita un documento Aurora en vigor y el movimiento `movement-lucia-0`. Tiene una afirmación no verificada sobre las compras. Tiene siguiente paso. El ingreso se enuncia como hecho («an incoming EUR 1,750 described as "September salary"»), no se clasifica como nómina. |
 | P2 | Ningún importe en euros en la respuesta. | Tiene una afirmación no verificada. Tiene siguiente paso. |
 | P3 | La respuesta no contiene 5 EUR como comisión. | Cita `acc-bruno` y un documento Horizon en vigor. La respuesta contiene 3 EUR. |
 | P4 | Ninguna afirmación verificada aplica la exención de Aurora. | Cita `acc-diego` y un documento Horizon en vigor. |
 | P5 | No da 8 EUR como cifra verificada. | Tiene siguiente paso. |
+
+Los dos criterios de P1 sobre los movimientos salen del experimento de la parte (a) (`notes/01-structured-output-experiment.md`): en su respuesta de ejemplo, el modelo contó «Groceries» como compra con tarjeta y llamó «salary payment» al ingreso. Por eso pasan a ser requisitos explícitos de las instrucciones.
 
 `POST /api/preview-answer` siempre llama al modelo. Lo que permite es fijar las fuentes, y así separar la búsqueda de la redacción; sirve para una prueba con modelo y entradas controladas, no para una comprobación sin modelo.
 

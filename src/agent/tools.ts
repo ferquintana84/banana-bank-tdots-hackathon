@@ -3,7 +3,7 @@ import { z } from 'zod';
 import type { FunctionTool } from 'openai/resources/responses/responses';
 import { bankRequest } from '../banking/client';
 import { transferMoney, reconcileSafely } from '../banking/actions';
-import { searchDocuments } from '../retrieval/search';
+import { searchDocuments, sourcesForAnswer } from '../retrieval/search';
 import { appDb } from '../db';
 import { recordEvent } from '../telemetry';
 import type { ToolContext } from '../types';
@@ -71,8 +71,8 @@ export async function runTool(name: string, args: unknown, ctx: ToolContext): Pr
         break;
       case 'search_documents':
         result = {
-          sources: await searchDocuments(
-            z.object({ query: z.string().max(2000) }).parse(args).query,
+          sources: sourcesForAnswer(
+            await searchDocuments(z.object({ query: z.string().max(2000) }).parse(args).query),
           ),
         };
         break;
