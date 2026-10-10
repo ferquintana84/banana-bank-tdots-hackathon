@@ -89,3 +89,17 @@ Cada entrada sigue el mismo formato: fecha, decisión, alternativas descartadas 
 - **Decisión:** cuando el resultado de confirmar o cancelar una propuesta se escribe en la conversación que el cliente tiene abierta en pantalla, la interfaz no muestra además el aviso amarillo. El servidor indica en qué conversación lo ha escrito y la página decide. Si el cliente está en otra página, o la propuesta no nació en una conversación, el aviso se muestra como antes. El panel «Transfers checked with the bank» se mantiene: es el sitio que acompaña al cliente de una página a otra (D10), no un duplicado. En el mismo cambio se corrige la redacción de la advertencia de pago idéntico: «on {fecha} at {hora}».
 - **Alternativas descartadas:** dejar el resultado en los dos sitios; quitar siempre el aviso amarillo; dejar de escribir el resultado en la conversación; retirar también el panel cuando la conversación ya muestra el resultado.
 - **Motivo:** es el mismo principio de D10, cada estado en un solo sitio. Al verificar las capturas de la prueba de aceptación de Fix 2, el mismo resultado aparecía a la vez en el aviso y en la burbuja del chat (O5); no se contradecían, pero dos sitios para un mismo hecho acaban divergiendo. La conversación es el sitio que perdura y el que verá un operador, así que es el aviso el que se retira.
+
+## D13. Las citas se validan por construcción
+
+- **Fecha:** 2026-10-10.
+- **Decisión:** en la Parte 2, el modelo devuelve cada respuesta con una estructura fija (verificado, no verificado y siguiente paso) y el servidor comprueba cada cita antes de guardarla. Una fuente solo vale si es un documento recuperado en ese turno y en vigor, o un dato del banco que una herramienta devolvió en ese turno. Una afirmación «verificada» sin fuente válida, o con un importe en euros que no aparece en su fuente, pasa a «no verificada». Antes de construirlo se hace un experimento pequeño para confirmar que el modelo configurado admite respuesta estructurada junto con herramientas.
+- **Alternativas descartadas:** pedir las fuentes solo con instrucciones al modelo; mostrar como fuentes todos los fragmentos recuperados, sin ligarlos a cada afirmación.
+- **Motivo:** es el mismo principio de Fix 2, garantizado por construcción y no por instrucciones. Unas instrucciones no impiden que el modelo cite algo que no ha leído; un validador sí. Límite declarado: el servidor comprueba que la fuente existe, está en vigor y contiene las cifras citadas, no que el modelo haya interpretado bien el texto.
+
+## D14. Solo se recuperan documentos en vigor
+
+- **Fecha:** 2026-10-10.
+- **Decisión:** la búsqueda descarta los documentos cuya vigencia no incluye la fecha de referencia, 2026-09-24. Las preguntas históricas («¿cuál era la comisión en julio?») quedan como límite declarado: el asistente dice que solo puede confirmar las condiciones vigentes y ofrece un siguiente paso. La versión y la vigencia de cada fuente se toman del manifiesto en el momento de buscar, sin regenerar el índice.
+- **Alternativas descartadas:** seguir recuperando los documentos archivados marcados como históricos y prohibir citarlos para condiciones vigentes; corregir el troceado y regenerar el índice; añadir un umbral de relevancia.
+- **Motivo:** es el alcance más pequeño que impide que una condición archivada pase por vigente, y hoy es el día de entrega. Unir con el manifiesto no consume cuota de embeddings y funciona con un índice suministrado por otro. Recuperar archivos marcados como históricos es mejor producto, pero añade un camino más que verificar.
