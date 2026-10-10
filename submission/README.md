@@ -52,7 +52,7 @@ Para probarlo: abrir como Lucía y preguntar «Will I pay the Aurora account fee
 ## Supporting materials
 
 - **Sesiones de IA completas:** `ai-sessions/`. Todo el código y la documentación se hicieron en una sola sesión de Claude Code. La estrategia, los criterios y los prompts se trabajaron además en una conversación con Claude (claude.ai) que actuó como asesor; no se incluye porque mezcla asuntos personales ajenos al reto. Todos los prompts que salieron de ella están, literales, en la sesión de Claude Code.
-  - `ai-sessions/9997bacc-c426-419e-9f91-b3cbcdcac952.jsonl`: la sesión completa en su formato original, sin editar. Es el único archivo que la contiene entera.
+  - `ai-sessions/9997bacc-c426-419e-9f91-b3cbcdcac952.jsonl`: la sesión completa en su formato original, sin editar. Es el único archivo que la contiene entera. Se copió al final del todo, después de la prueba de extracción; lo único que no puede contener es el último paso: la búsqueda de secretos sobre esa copia y la reconstrucción del ZIP.
   - `ai-sessions/9997bacc-c426-419e-9f91-b3cbcdcac952/tool-results/`: tres resultados de herramientas a los que remite el archivo anterior.
   - `ai-sessions/memory/`: las tres notas de trabajo que la herramienta guardó entre un día y otro.
   - `ai-sessions/01-sesion-parte1.txt`: exportación legible del primer día (Parte 1).
