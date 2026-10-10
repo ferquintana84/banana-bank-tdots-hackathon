@@ -7,6 +7,13 @@ La hace Fernando en el navegador.
 - **Garantía y modelo:** que una fuente citada exista, esté en vigor y contenga las cifras citadas lo garantiza el servidor. La redacción depende del modelo y puede variar.
 - **Letras de sección:** N, T, U, V, W, X e Y. Se saltan las que ya nombran otra cosa en la entrega: P (preguntas), O (observaciones) y R (casos del script).
 
+## Resultado de la ejecución
+
+- **Fecha:** 2026-10-10, entre las 08:09 y las 08:26, tras `npm run reset`, sobre el commit `4317245`.
+- **Resultado:** seis secciones superadas y una con un paso que no cumple (V-1).
+- **Saldo de Lucía (Aurora account):** 4.007,50 EUR al empezar y 4.006,50 EUR al terminar: un solo pago confirmado, de 1 EUR.
+- **Quién lo comprobó:** Fernando, a mano. Las 14 capturas se abrieron una a una para comprobar que muestran lo que se cita.
+
 ## Preparación
 
 1. Parar los servicios (Ctrl+C) y ejecutar: `nvm use`, `npm run reset`, `npm run dev`.
@@ -24,10 +31,10 @@ Saldo de partida de Lucía (Aurora account) tras el reset: €4,007.50. Sale de 
 
 | Paso | Debo ver | Captura | Resultado |
 |---|---|---|---|
-| N-1 | La respuesta dice 3 EUR. Bajo ella, la tarjeta con «Verified» y dos fichas: «Bank · Horizon account» y «Horizon · current fees · v2 · in force since 2026-09-01 ↗». | `N-1-chat-tarjeta.png` | |
-| N-2 | Tras pulsar la ficha, la página Documents con el original abierto: «Horizon · current fees», V2, «Effective: 2026-09-01», y el texto «The monthly fee for Horizon is EUR 3.» | `N-2-documento-original.png` | |
+| N-1 | La respuesta dice 3 EUR. Bajo ella, la tarjeta con «Verified» y dos fichas: «Bank · Horizon account» y «Horizon · current fees · v2 · in force since 2026-09-01 ↗». | `N-1-chat-tarjeta.png` | Sí |
+| N-2 | Tras pulsar la ficha, la página Documents con el original abierto: «Horizon · current fees», V2, «Effective: 2026-09-01», y el texto «The monthly fee for Horizon is EUR 3.» | `N-2-documento-original.png` | Sí |
 
-**Resultado N:** ______
+**Resultado N:** SUPERADA.
 
 ## T. Lucía: ¿pagaré la comisión Aurora este mes?
 
@@ -35,11 +42,11 @@ Saldo de partida de Lucía (Aurora account) tras el reset: €4,007.50. Sale de 
 
 | Paso | Debo ver | Captura | Resultado |
 |---|---|---|---|
-| T-1 | La respuesta no dice ni «pagarás» ni «no pagarás». La tarjeta muestra a la vez «Verified» y «Not verified», y un «Next step». | `T-1-chat-tarjeta.png` | |
-| T-2 | En «Verified», la ficha del ingreso: «Bank · September salary · €1,750.00 · 02 Sep at 12:00», y una ficha de un documento Aurora con versión y vigencia. | La misma captura, o `T-2-fichas.png` si hace falta ampliar | |
-| T-3 | En «Not verified», las compras con tarjeta, con su motivo. | La misma captura | |
+| T-1 | La respuesta no dice ni «pagarás» ni «no pagarás». La tarjeta muestra a la vez «Verified» y «Not verified», y un «Next step». | `T-1-chat-tarjeta.png` | Sí |
+| T-2 | En «Verified», la ficha del ingreso: «Bank · September salary · €1,750.00 · 02 Sep at 12:00», y una ficha de un documento Aurora con versión y vigencia. | `T-2-fichas.png` | Sí |
+| T-3 | En «Not verified», las compras con tarjeta, con su motivo. | `T-2-fichas.png` | Sí |
 
-**Resultado T:** ______
+**Resultado T:** SUPERADA.
 
 ## U. Lucía: una pregunta histórica
 
@@ -47,9 +54,9 @@ Saldo de partida de Lucía (Aurora account) tras el reset: €4,007.50. Sale de 
 
 | Paso | Debo ver | Captura | Resultado |
 |---|---|---|---|
-| U-1 | Ninguna ficha de un documento archivado en la tarjeta, y ningún «EUR 8» en la respuesta ni en la tarjeta. Hay un «Next step». | `U-1-chat-historica.png` | |
+| U-1 | Ninguna ficha de un documento archivado en la tarjeta, y ningún «EUR 8» en la respuesta ni en la tarjeta. Hay un «Next step». | `U-1-chat-historica.png` | Sí |
 
-**Resultado U:** ______
+**Resultado U:** SUPERADA.
 
 ## V. Lucía: una transferencia por chat sigue igual
 
@@ -58,11 +65,13 @@ Saldo de partida de Lucía (Aurora account) tras el reset: €4,007.50. Sale de 
 
 | Paso | Debo ver | Captura | Resultado |
 |---|---|---|---|
-| V-1 | El asistente dice que no se ha enviado nada. Bajo su respuesta no hay tarjeta de evidencia. Aparece la tarjeta «Review your transfer» con Confirm transfer y Cancel. | `V-1-chat-propuesta.png` | |
-| V-2 | Tras cancelar, la conversación recoge «You cancelled this transfer. Nothing was sent.» y no aparece además el aviso amarillo (comprobación visual de O5). | `V-2-cancelada.png` | |
-| V-3 | En Overview, ningún movimiento «Aceptación V» y saldo de €4,007.50. | `V-3-overview.png` | |
+| V-1 | El asistente dice que no se ha enviado nada. Bajo su respuesta no hay tarjeta de evidencia. Aparece la tarjeta «Review your transfer» con Confirm transfer y Cancel. | `V-1-chat-propuesta.png` | **No** |
+| V-2 | Tras cancelar, la conversación recoge «You cancelled this transfer. Nothing was sent.» y no aparece además el aviso amarillo (comprobación visual de O5). | `V-2-cancelada.png` | Sí |
+| V-3 | En Overview, ningún movimiento «Aceptación V» y saldo de €4,007.50. | `V-3-overview.png` | Sí |
 
-**Resultado V:** ______
+V-1 no cumple: bajo la propuesta aparece una tarjeta de evidencia. La lista predecía que no la habría, porque suponía que una transferencia no guarda evidencia; la suposición era del asistente de IA y era errónea. Véase O9.
+
+**Resultado V:** NO SUPERADA en V-1. V-2 y V-3 superados; O5 queda comprobada en pantalla (la cancelación aparece en la conversación y no se repite como aviso).
 
 ## W. Una conversación anterior a la Parte 2
 
@@ -70,9 +79,9 @@ Saldo de partida de Lucía (Aurora account) tras el reset: €4,007.50. Sale de 
 
 | Paso | Debo ver | Captura | Resultado |
 |---|---|---|---|
-| W-1 | Los mensajes de siempre, sin tarjeta de evidencia y sin ningún error. | `W-1-conversacion-antigua.png` | |
+| W-1 | Los mensajes de siempre, sin tarjeta de evidencia y sin ningún error. | `W-1-conversacion-antigua.png` | Sí |
 
-**Resultado W:** ______
+**Resultado W:** SUPERADA.
 
 ## X. Cambio de cliente mientras se abre una fuente
 
@@ -80,11 +89,13 @@ Saldo de partida de Lucía (Aurora account) tras el reset: €4,007.50. Sale de 
 
 | Paso | Debo ver | Captura | Resultado |
 |---|---|---|---|
-| X-1 | El Overview de Bruno. No queda abierto el documento que pidió Lucía y no aparece ningún error. | `X-1-cambio-cliente.png` | |
+| X-1 | El Overview de Bruno. No queda abierto el documento que pidió Lucía y no aparece ningún error. | `X-1-cambio-cliente.png` | Sí |
 
 Es difícil de sincronizar a mano porque la respuesta local es casi instantánea. Se anota lo que ocurra; lo esperado, llegue antes el clic o el cambio, es que Bruno no herede nada de Lucía.
 
-**Resultado X:** ______
+Se hizo en secuencia: abrir la ficha y después cambiar a Bruno. La carrera en sí no se pudo reproducir a mano, y no hay ninguna prueba automática de esa guarda.
+
+**Resultado X:** SUPERADA, verificada por lectura de código (`app/page.tsx:281-292`) y una comprobación manual en secuencia.
 
 ## Y. La advertencia de pago idéntico dice la fecha bien (O4)
 
@@ -95,20 +106,23 @@ Es difícil de sincronizar a mano porque la respuesta local es casi instantánea
 | Paso | Debo ver | Captura | Resultado |
 |---|---|---|---|
 | Y-0 | Tras el paso 1, aviso de completada con referencia y el formulario vacío. | `Y-0-completada.png` | — |
-| Y-1 | Tras el paso 2, la advertencia de la tarjeta dice «You already completed an identical transfer on 10 Oct at {hora} (reference …)», con «on» y sin «at» repetido (comprobación visual de O4). | `Y-1-advertencia.png` | |
-| Y-2 | Tras cancelar, aviso «You cancelled this transfer. Nothing was sent.» y la tarjeta desaparece. | `Y-2-cancelada.png` | |
-| Y-3 | En Overview, un solo movimiento «Transfer · Aceptación Y» de −€1.00 y saldo de €4,006.50: el saldo anterior, €4,007.50, menos 1,00 EUR. | `Y-3-overview.png` | |
+| Y-1 | Tras el paso 2, la advertencia de la tarjeta dice «You already completed an identical transfer on 10 Oct at {hora} (reference …)», con «on» y sin «at» repetido (comprobación visual de O4). | `Y-1-advertencia.png` | Sí |
+| Y-2 | Tras cancelar, aviso «You cancelled this transfer. Nothing was sent.» y la tarjeta desaparece. | `Y-2-cancelada.png` | Sí |
+| Y-3 | En Overview, un solo movimiento «Transfer · Aceptación Y» de −€1.00 y saldo de €4,006.50: el saldo anterior, €4,007.50, menos 1,00 EUR. | `Y-3-overview.png` | Sí |
 
-**Resultado Y:** ______
+**Resultado Y:** SUPERADA. O4 queda comprobada en pantalla: «on 10 Oct at 08:26», con la misma referencia (`800d454b…`) que en Y-0.
 
-## Saldo final esperado
+## Saldo final
 
-Lucía, Aurora account: €4,006.50. Un solo pago confirmado, de 1 EUR (Y). La propuesta de V y la segunda de Y se cancelaron.
+Lucía, Aurora account: €4,006.50, exactamente el esperado. Un solo pago confirmado, de 1 EUR (Y). La propuesta de V y la segunda de Y se cancelaron.
 
 ## Observaciones humanas
 
-Lo que se vea durante la prueba y que ningún script comprueba.
+Lo que Fernando vio durante la prueba y que ningún script comprueba. La numeración continúa la de Fix 1 y Fix 2.
 
-| ID | Observación | Estado |
-|---|---|---|
-| | | |
+| ID | Observación | Evidencia | Estado |
+|---|---|---|---|
+| O6 | La vista del documento original muestra el Markdown sin formato («# Horizon · current fees», «## Scope and questions»). Es de la aplicación original y es cosmético. | `N-2-documento-original.png` | No se corrige. |
+| O7 | El siguiente paso dice «Check your settled card purchases in the app», mientras la misma tarjeta dice que la lista de movimientos no identifica las compras con tarjeta. Remite al cliente a algo que la aplicación no muestra. | `T-2-fichas.png` | Se corrige (D16). |
+| O8 | La respuesta dice «I can ask a support operator» y el siguiente paso, «Ask me to open a support case». La capacidad existe (herramienta `request_human`, `src/agent/tools.ts`), pero nada comprobaba que un caso «abierto» se hubiera abierto de verdad. | `U-1-chat-historica.png` | Se corrige (D16). |
+| O9 | (a) Una afirmación cierta sobre la propuesta aparece en «Not verified» con «No valid source supports this statement», justo encima de esa propuesta. (b) Una afirmación compuesta se da por verificada citando solo la cuenta Aurora. | `V-1-chat-propuesta.png` | (a) se corrige (D16). (b) queda como límite declarado en `04-feature.md`. |
