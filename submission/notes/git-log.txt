@@ -1,8 +1,16 @@
 # Historia del repositorio
 # Generado con: git log --date=iso-strict --stat --format='%h | %ad | %s'
-# Hasta el commit bc74102 incluido. El commit que añade este archivo, y los posteriores, no aparecen.
-# Total: 91 commits.
+# Hasta el commit 312305b incluido. El commit que añade este archivo, y los posteriores, no aparecen.
+# Total: 93 commits.
 
+312305b | 2026-10-10T16:04:50+02:00 | docs: state exactly what the session file cannot contain
+
+ submission/README.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+082bbb9 | 2026-10-10T16:01:23+02:00 | docs: regenerate the repository history
+
+ submission/notes/git-log.txt | 20 ++++++++++++++++++--
+ 1 file changed, 18 insertions(+), 2 deletions(-)
 bc74102 | 2026-10-10T16:01:22+02:00 | docs: add the video transcript and list the session files
 
  submission/00-method.md                                        |    1 +
