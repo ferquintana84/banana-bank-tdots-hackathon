@@ -121,6 +121,25 @@ Se hizo en secuencia: abrir la ficha y después cambiar a Bruno. La carrera en s
 
 **Resultado Y:** SUPERADA. O4 queda comprobada en pantalla: «on 10 Oct at 08:26», con la misma referencia (`800d454b…`) que en Y-0.
 
+## Repetición de O10: cada conversación muestra solo su propuesta
+
+Se ejecutó el 2026-10-10, hacia las 09:26, tras `npm run reset`, con el código congelado (commit `9b874b7`).
+
+1. Como Lucía, conversación nueva (A): «Send EUR 10 from my Aurora account to Bruno. Description: Aceptación O10-A». Sin confirmar.
+2. «+ New conversation» (B): «Send EUR 10 from my Aurora account to Bruno. Description: Aceptación O10-B». Sin confirmar.
+3. Volver a la conversación A desde la lista.
+4. Abrir Transfers.
+5. Pulsar Cancel en las dos tarjetas.
+
+| Paso | Debo ver | Captura | Resultado |
+|---|---|---|---|
+| O10-bis-1 | Bajo la conversación B, una sola tarjeta de revisión: «Aceptación O10-B», que caduca a las 09:36. La ficha «Proposal · €10.00 · expires 09:36 ↓» de la respuesta coincide con esa hora y lleva la flecha que conduce a la tarjeta. | `O10-bis-1.png` | Sí |
+| O10-bis-2 | De vuelta en la conversación A, una sola tarjeta: «Aceptación O10-A», que caduca a las 09:36. | `O10-bis-2.png` | Sí |
+| O10-bis-3 | En Transfers, las dos tarjetas, primero «Aceptación O10-B» y después «Aceptación O10-A». Ninguna lleva advertencia de pago idéntico. | `O10-bis-3.png` | Sí |
+| O10-bis-4 | Tras cancelar las dos, en Overview el saldo sigue en €4,007.50 y no hay ningún movimiento «Aceptación O10». | `O10-bis-4-overview.png` | Sí |
+
+**Resultado O10-bis:** SUPERADA.
+
 ## Saldo final
 
 Lucía, Aurora account: €4,006.50, exactamente el esperado. Un solo pago confirmado, de 1 EUR (Y). La propuesta de V y la segunda de Y se cancelaron.
@@ -135,4 +154,4 @@ Lo que Fernando vio durante la prueba y que ningún script comprueba. La numerac
 | O7 | El siguiente paso dice «Check your settled card purchases in the app», mientras la misma tarjeta dice que la lista de movimientos no identifica las compras con tarjeta. Remite al cliente a algo que la aplicación no muestra. | `T-2-fichas.png` | Se corrige (D16). |
 | O8 | La respuesta dice «I can ask a support operator» y el siguiente paso, «Ask me to open a support case». La capacidad existe (herramienta `request_human`, `src/agent/tools.ts`), pero nada comprobaba que un caso «abierto» se hubiera abierto de verdad. | `U-1-chat-historica.png` | Se corrige (D16). |
 | O9 | (a) Una afirmación cierta sobre la propuesta aparece en «Not verified» con «No valid source supports this statement», justo encima de esa propuesta. (b) Una afirmación compuesta se da por verificada citando solo la cuenta Aurora. | `V-1-chat-propuesta.png` | (a) se corrige (D16). (b) queda como límite declarado en `04-feature.md`. |
-| O10 | Bajo una conversación, el área de revisión muestra todas las propuestas vivas del cliente, la más antigua primero. Las que habían dejado los scripts aparecían por encima de la recién pedida, y la más antigua justo bajo el chat. Un cliente real también puede tener dos propuestas vivas. Cada tarjeta tiene su propio Confirm, así que no se ejecuta nada equivocado; el riesgo es qué tarjeta elige el cliente. | `V-1-bis-chat-propuesta.png`, `O10-propuesta-propia-abajo.png` | Se corrige (D17). |
+| O10 | Bajo una conversación, el área de revisión muestra todas las propuestas vivas del cliente, la más antigua primero. Las que habían dejado los scripts aparecían por encima de la recién pedida, y la más antigua justo bajo el chat. Un cliente real también puede tener dos propuestas vivas. Cada tarjeta tiene su propio Confirm, así que no se ejecuta nada equivocado; el riesgo es qué tarjeta elige el cliente. | `V-1-bis-chat-propuesta.png`, `O10-propuesta-propia-abajo.png` | Corregida en `9b874b7` (D17) y comprobada en pantalla el 2026-10-10 (`O10-bis-1.png` a `O10-bis-4-overview.png`). |
