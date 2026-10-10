@@ -74,3 +74,33 @@ export function sourcesForAnswer(results: SearchResult[]): AnswerSource[] {
     ];
   });
 }
+// The documents in force for the products a customer holds. The manifest has no product
+// field, so the product name at the start of the title is the only deterministic link;
+// a product with no such document adds nothing.
+export function productDocuments(labels: string[], role = 'customer'): AnswerSource[] {
+  const products = [
+    ...new Set(
+      labels.map((l) =>
+        l
+          .replace(/\s+account$/i, '')
+          .trim()
+          .toLowerCase(),
+      ),
+    ),
+  ].filter(Boolean);
+  return documents()
+    .filter(
+      (d) =>
+        (role === 'operator' || d.audience === 'public') &&
+        inForce(d) &&
+        products.some((p) => d.title.toLowerCase().startsWith(`${p} `)),
+    )
+    .map((d) => ({
+      documentId: d.id,
+      title: d.title,
+      version: d.version,
+      validFrom: d.validFrom,
+      validTo: d.validTo,
+      text: readDocument(d),
+    }));
+}

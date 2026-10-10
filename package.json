@@ -19,7 +19,7 @@
     "repro": "node --import tsx scripts/repro.ts",
     "eval": "node --import tsx scripts/eval-answers.ts",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "node --import tsx --test tests/invariants.test.ts tests/transfer-outcome.test.ts tests/reconcile.test.ts tests/proposals.test.ts tests/retrieval.test.ts tests/evidence.test.ts"
+    "test": "node --import tsx --test tests/invariants.test.ts tests/transfer-outcome.test.ts tests/reconcile.test.ts tests/proposals.test.ts tests/retrieval.test.ts tests/evidence.test.ts tests/product-documents.test.ts"
   },
   "dependencies": {
     "better-sqlite3": "13.0.3",

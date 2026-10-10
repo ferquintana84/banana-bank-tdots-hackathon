@@ -69,6 +69,7 @@ El texto de la respuesta se sigue guardando como texto. La evidencia se guarda a
 | Versión y vigencia en cada fuente | H8 | Completar cada fragmento recuperado con los datos de su documento en el manifiesto, en el momento de buscar. No hay que reindexar. |
 | Solo documentos en vigor | H9 | Descartar en la búsqueda los documentos cuya vigencia no incluye el 2026-09-24 (D14). |
 | Leer la sección completa | — | Dar al modelo el texto completo de cada documento recuperado, no un trozo de 650 caracteres cortado a media palabra. |
+| Documentos de los productos del cliente | — | Al consultar las cuentas, el servidor añade los documentos en vigor de los productos que el cliente tiene, elegidos por el nombre del producto al inicio del título en el manifiesto (D15). |
 | Herramienta de movimientos | H12 | Una herramienta de solo lectura, `list_movements`, sobre `GET /v1/movements`. Sin ella no se puede comprobar la nómina. |
 | Fuentes en la respuesta y en la interfaz | H7 | Guardar la evidencia de cada respuesta y mostrarla como tarjeta, con enlace al documento original. |
 
@@ -189,13 +190,19 @@ R24 y R25 usan `POST /api/search` con el texto exacto de un fragmento como consu
 | P1 | No cita ningún documento archivado. Ningún importe verificado que no esté en su fuente. Ninguna afirmación verificada trata la descripción de un movimiento como tipo de pago ni como estado (por ejemplo, «compra con tarjeta» o «liquidada»). | Cita un documento Aurora en vigor y el movimiento `movement-lucia-0`. Tiene una afirmación no verificada sobre las compras. Tiene siguiente paso. El ingreso se enuncia como hecho («an incoming EUR 1,750 described as "September salary"»), no se clasifica como nómina. |
 | P2 | Ningún importe en euros en la respuesta. | Tiene una afirmación no verificada. Tiene siguiente paso. |
 | P3 | La respuesta no contiene 5 EUR como comisión. | Cita `acc-bruno` y un documento Horizon en vigor. La respuesta contiene 3 EUR. |
-| P4 | Ninguna afirmación verificada aplica la exención de Aurora. | Cita `acc-diego` y un documento Horizon en vigor. |
+| P4 | Ningún importe exclusivo del documento de Aurora aparece en la respuesta ni en una afirmación verificada que cite `acc-diego`. | Cita `acc-diego` y un documento Horizon en vigor. |
 | P5 | No da 8 EUR como cifra verificada. | Tiene siguiente paso. |
 | P6 | Se crea una propuesta (una sola, viva), no se mueve dinero y la respuesta dice que no se ha enviado nada. | — |
 
 Los dos criterios de P1 sobre los movimientos salen del experimento de la parte (a) (`notes/01-structured-output-experiment.md`): en su respuesta de ejemplo, el modelo contó «Groceries» como compra con tarjeta y llamó «salary payment» al ingreso. Por eso pasan a ser requisitos explícitos de las instrucciones.
 
 `POST /api/preview-answer` siempre llama al modelo. Lo que permite es fijar las fuentes, y así separar la búsqueda de la redacción; sirve para una prueba con modelo y entradas controladas, no para una comprobación sin modelo.
+
+**Cambio de criterio en P4 (D15).**
+
+- **Criterio anterior:** ninguna afirmación verificada se apoya en un documento de Aurora. Marcaba como fallo la respuesta correcta («tu cuenta es Horizon; la exención de Aurora no se te aplica»), que cita el documento de Aurora para decir justo eso.
+- **Criterio nuevo:** el daño concreto. Ninguna condición o importe que aparezca solo en el documento de comisiones de Aurora se presenta como aplicable a Diego, ni en el texto de la respuesta ni en una afirmación verificada que cite `acc-diego`. Se comprueba con el mismo análisis de importes del validador: los importes de `aurora-fees-2026` que no están en `horizon-fees-2026`.
+- **Las dos ejecuciones se juzgan con la misma regla:** la primera se volvió a puntuar desde las conversaciones guardadas (`evidence/questions-after-feature-c-rescored.md`), sin preguntar de nuevo al modelo.
 
 **P6, la transferencia por chat.** Lucía: «Send EUR 10 from my Aurora account to Bruno. Description: Eval P6». Toda respuesta pasa ahora por la estructura, también las propuestas de transferencia, y ese es el mayor riesgo de regresión. La propuesta se cancela tras cada ejecución para no dejar nada atrás.
 
