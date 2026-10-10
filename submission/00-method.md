@@ -65,7 +65,8 @@ Los diagramas se escriben en Mermaid.
 | `submission/02-decisions.md` | Registro de decisiones. |
 | `submission/03-fixes/` | Un archivo por corrección, con evidencia antes/después. |
 | `submission/04-feature.md` | Funcionalidad de la Parte 2. |
-| `submission/05-go-no-go.md` | Checklist final Go/No-Go. |
+| `submission/05-security-audit.md` | Auditoría de seguridad, de solo lectura. |
+| `submission/06-go-no-go.md` | Decisión final Go/No-Go y condiciones para producción. |
 | `submission/notes/` | Notas de trabajo y observaciones sin verificar. |
 | `submission/ai-sessions/` | Sesiones de IA completas, en su exportación original. |
 | `submission/demo.mp4` | Vídeo de demostración de ambas partes. Se graba al final. |
