@@ -195,6 +195,4 @@ La primera ejecución de la parte (b) pasó la comprobación de tipos y las 18 p
 
 - **La misma lección, otra vez.** Al corregir la interfaz tras la prueba humana vimos que, si la comprobación fallaba, el servidor respondía con una lista vacía, y la pantalla habría borrado un aviso de «pendiente» sin decir nada. Ahora responde «la comprobación ha fallado» (`null`), que no es lo mismo que «no hay nada que contar», y la pantalla conserva lo que mostraba (D10).
 
-- **Y una vez más, ahora con la evidencia.** En la Parte 2, el commit de evidencia `29b55df` se registró antes de que todo el paso de escritura hubiera terminado bien: la tarjeta estaba escrita, pero la hoja de estilos y una nota del documento habían fallado. Lo sustituye `c2e2bd0`; el historial no se reescribió. Regla: comprobar que cada paso de escritura ha tenido éxito antes de registrar evidencia.
-
 Conecta directamente con la tesis: un sistema que falla en silencio también está afirmando algo que no puede verificar. Aquí afirmaba «no hay nada que conciliar» cuando en realidad no había mirado.

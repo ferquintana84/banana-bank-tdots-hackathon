@@ -227,3 +227,7 @@ Los dos criterios de P1 sobre los movimientos salen del experimento de la parte 
 | Cada respuesta tarda más por las herramientas de datos. | El modelo solo las llama cuando la pregunta es personal. Se mide en el conjunto de preguntas. |
 
 **Fuera de alcance:** la vista de operador (R10); las preguntas históricas; corregir el troceado y regenerar el índice; un umbral de relevancia en la búsqueda; clasificar los movimientos por tipo; avisos proactivos; otros idiomas.
+
+## 9. Lo que aprendimos
+
+- **La evidencia se registra cuando todo lo anterior ha terminado bien.** El commit de evidencia `29b55df` se registró antes de que todo el paso de escritura hubiera tenido éxito: la tarjeta estaba escrita, pero la hoja de estilos y una nota de este documento habían fallado. Lo sustituye `c2e2bd0`; el historial no se reescribió. Regla: comprobar que cada paso de escritura ha tenido éxito antes de registrar evidencia.
