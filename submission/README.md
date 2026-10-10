@@ -52,7 +52,7 @@ Para probarlo: abrir como Lucía y preguntar «Will I pay the Aurora account fee
 ## Supporting materials
 
 - **Sesiones de IA completas:** `ai-sessions/`.
-- **Video de demostración:** `demo.mp4`.
+- **Vídeo de demostración:** `demo.mp4`.
 - **Historia del repositorio:** [`notes/git-log.txt`](notes/git-log.txt). El ZIP no incluye `.git`, y varios documentos citan commits (por ejemplo, los casos registrados en rojo antes del código); este archivo permite comprobarlos.
 - **Qué está terminado:** las dos correcciones y la funcionalidad, con su evidencia.
 - **Qué queda pendiente:** no está listo para producción. La primera condición es dejar de enviar IBAN de terceros al proveedor del modelo (S1); la lista completa está en [`06-go-no-go.md`](06-go-no-go.md) y en [`05-security-audit.md`](05-security-audit.md).
