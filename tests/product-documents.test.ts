@@ -50,6 +50,36 @@ test('a customer with two products gets the documents of both, each once', () =>
   assert.equal(new Set(ids).size, ids.length);
   assert.ok(ids.includes('aurora-fees-2026') && ids.includes('horizon-fees-2026'));
 });
+test('what the tools did in this turn becomes citable: proposal, recipients and case', () => {
+  const facts = newFacts();
+  learn(facts, 'list_accounts', accountsOf('Aurora account'));
+  assert.deepEqual(facts.recipients.get('acc-other'), {
+    id: 'acc-other',
+    name: 'Someone else',
+    label: 'Aurora account',
+  });
+  learn(facts, 'transfer_money', {
+    status: 'requires_confirmation',
+    approval: {
+      id: 'approval-1',
+      expiresAt: '2026-10-10T06:25:00.000Z',
+      payload: {
+        fromAccountId: 'acc-0',
+        toAccountId: 'acc-other',
+        amountCents: 1000,
+        concept: 'Dinner',
+      },
+    },
+  });
+  assert.equal(facts.proposals.get('approval-1')?.amountCents, 1000);
+  // A transfer that did not end in a proposal leaves nothing to cite.
+  learn(facts, 'transfer_money', { status: 'failed', error: 'Insufficient funds.' });
+  assert.equal(facts.proposals.size, 1);
+  learn(facts, 'request_human', { status: 'open', incidentId: 'case-1' });
+  assert.deepEqual(facts.cases.get('case-1'), { id: 'case-1', status: 'open' });
+  learn(facts, 'request_human', { status: 'failed', error: 'A conversation is required.' });
+  assert.equal(facts.cases.size, 1);
+});
 after(() => {
   closeAppDb();
   fs.rmSync(temp, { recursive: true, force: true });

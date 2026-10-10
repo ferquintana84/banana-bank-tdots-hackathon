@@ -14,6 +14,17 @@ const date = (value: string) =>
 const clock = (value: string) =>
   new Intl.DateTimeFormat('en-IE', { hour: '2-digit', minute: '2-digit' }).format(new Date(value));
 const mask = (iban: string) => `${iban.slice(0, 9)} ···· ${iban.slice(-4)}`;
+// How a non-document source of a verified statement is shown under an answer.
+const sourceLabel = (s: AnyRecord) =>
+  s.kind === 'account'
+    ? `Bank · ${s.label}`
+    : s.kind === 'movement'
+      ? `Bank · ${s.description} · ${money(s.amountCents)} · ${date(s.createdAt)}`
+      : s.kind === 'proposal'
+        ? `Proposal · ${money(s.amountCents)} · expires ${clock(s.expiresAt)}`
+        : s.kind === 'recipient'
+          ? `Recipient · ${s.name} · ${s.label}`
+          : `Support case · ${s.status}`;
 async function api(path: string, body?: unknown) {
   const response = await fetch(`/api/${path}`, {
     method: body === undefined ? 'GET' : 'POST',
@@ -695,9 +706,7 @@ export default function Home() {
                                                 </button>
                                               ) : (
                                                 <span key={s.id} className="evidence-source">
-                                                  {s.kind === 'account'
-                                                    ? `Bank · ${s.label}`
-                                                    : `Bank · ${s.description} · ${money(s.amountCents)} · ${date(s.createdAt)}`}
+                                                  {sourceLabel(s)}
                                                 </span>
                                               ),
                                             )}

@@ -164,3 +164,83 @@ test('euro amounts are read in the forms the assistant and the documents use', (
     [600, 1175, 400750],
   );
 });
+// What a turn knows after preparing a proposal, listing recipients and opening a case (D16).
+function turnWithActions() {
+  const facts = turn();
+  facts.proposals.set('approval-1', {
+    id: 'approval-1',
+    amountCents: 1000,
+    fromAccountId: 'acc-lucia',
+    toAccountId: 'acc-bruno',
+    concept: 'Dinner',
+    expiresAt: '2026-10-10T06:25:00.000Z',
+  });
+  facts.recipients.set('acc-bruno', {
+    id: 'acc-bruno',
+    name: 'Bruno Vidal',
+    label: 'Horizon account',
+  });
+  facts.cases.set('case-1', { id: 'case-1', status: 'open' });
+  return facts;
+}
+const ref = (kind: 'proposal' | 'recipient' | 'case', id: string) => ({ kind, id });
+test('a proposal prepared in this turn backs the statement that it was prepared', () => {
+  const evidence = validateEvidence(
+    raw([
+      {
+        claim: 'A €10.00 transfer proposal was prepared; it has not been sent.',
+        sources: [ref('proposal', 'approval-1')],
+      },
+    ]),
+    turnWithActions(),
+  );
+  assert.equal(evidence.downgraded, 0);
+  assert.deepEqual(evidence.verified[0].sources, [
+    {
+      kind: 'proposal',
+      id: 'approval-1',
+      amountCents: 1000,
+      fromAccountId: 'acc-lucia',
+      toAccountId: 'acc-bruno',
+      concept: 'Dinner',
+      expiresAt: '2026-10-10T06:25:00.000Z',
+    },
+  ]);
+});
+test('a proposal that this turn did not prepare backs nothing', () => {
+  const claim = { claim: 'A proposal was prepared.', sources: [ref('proposal', 'approval-1')] };
+  assert.equal(validateEvidence(raw([claim]), turn()).verified.length, 0);
+  const other = { claim: 'A proposal was prepared.', sources: [ref('proposal', 'approval-9')] };
+  const evidence = validateEvidence(raw([other]), turnWithActions());
+  assert.equal(evidence.notVerified[0].reason, 'No valid source supports this statement.');
+});
+test('a proposal does not back an amount other than its own', () => {
+  const evidence = validateEvidence(
+    raw([{ claim: 'A €25.00 proposal was prepared.', sources: [ref('proposal', 'approval-1')] }]),
+    turnWithActions(),
+  );
+  assert.equal(evidence.verified.length, 0);
+  assert.equal(
+    evidence.notVerified[0].reason,
+    'An amount in this statement does not appear in its source.',
+  );
+});
+test('a recipient returned in this turn can be cited, and only then', () => {
+  const claim = {
+    claim: 'Bruno Vidal is an available recipient with a Horizon account.',
+    sources: [ref('recipient', 'acc-bruno')],
+  };
+  assert.deepEqual(validateEvidence(raw([claim]), turnWithActions()).verified[0].sources, [
+    { kind: 'recipient', id: 'acc-bruno', name: 'Bruno Vidal', label: 'Horizon account' },
+  ]);
+  assert.equal(validateEvidence(raw([claim]), turn()).verified.length, 0);
+});
+test('a support case backs "a case was opened" only when this turn opened it', () => {
+  const claim = { claim: 'A support case was opened.', sources: [ref('case', 'case-1')] };
+  assert.deepEqual(validateEvidence(raw([claim]), turnWithActions()).verified[0].sources, [
+    { kind: 'case', id: 'case-1', status: 'open' },
+  ]);
+  const without = validateEvidence(raw([claim]), turn());
+  assert.equal(without.verified.length, 0);
+  assert.equal(without.notVerified[0].reason, 'No valid source supports this statement.');
+});

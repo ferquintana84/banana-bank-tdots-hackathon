@@ -14,9 +14,11 @@ import {
   answerText,
   collectAmounts,
   newFacts,
+  SOURCE_KINDS,
   validateEvidence,
   type Evidence,
   type Facts,
+  type SourceKind,
 } from './evidence';
 import { toolDefinitions, runTool } from './tools';
 import { conversationTransfers, intentKey, reconcileSafely } from '../banking/actions';
@@ -29,7 +31,7 @@ const UNFINISHED = 'I could not finish this request. Try again or ask for human 
 const sourceRef = {
   type: 'object',
   properties: {
-    kind: { type: 'string', enum: ['document', 'account', 'movement'] },
+    kind: { type: 'string', enum: SOURCE_KINDS },
     id: { type: 'string' },
   },
   required: ['kind', 'id'],
@@ -73,7 +75,7 @@ const rawEvidence = z.object({
     z.object({
       claim: z.string(),
       sources: z.array(
-        z.object({ kind: z.enum(['document', 'account', 'movement']), id: z.string() }),
+        z.object({ kind: z.enum(SOURCE_KINDS as [SourceKind, ...SourceKind[]]), id: z.string() }),
       ),
     }),
   ),
@@ -104,6 +106,21 @@ export function learn(facts: Facts, tool: string, result: unknown) {
     for (const a of data.accounts ?? [])
       facts.accounts.set(a.id, { id: a.id, label: a.label, balanceCents: a.balanceCents });
   if (tool === 'list_accounts') addDocuments(facts, data.productDocumentation ?? []);
+  if (tool === 'list_accounts')
+    for (const c of data.contacts ?? [])
+      facts.recipients.set(c.id, { id: c.id, name: String(c.name ?? c.id), label: c.label });
+  // Only what a tool actually returned: a proposal that exists, a case that was opened.
+  if (tool === 'transfer_money' && data.status === 'requires_confirmation' && data.approval)
+    facts.proposals.set(data.approval.id, {
+      id: data.approval.id,
+      amountCents: data.approval.payload.amountCents,
+      fromAccountId: data.approval.payload.fromAccountId,
+      toAccountId: data.approval.payload.toAccountId,
+      concept: data.approval.payload.concept,
+      expiresAt: data.approval.expiresAt,
+    });
+  if (tool === 'request_human' && data.status === 'open' && data.incidentId)
+    facts.cases.set(data.incidentId, { id: data.incidentId, status: data.status });
   if (tool === 'list_movements') for (const m of data.movements ?? []) facts.movements.set(m.id, m);
   if (tool === 'search_documents') addDocuments(facts, data.sources ?? []);
 }

@@ -8,11 +8,34 @@ export type Movement = {
   createdAt: string;
 };
 export type OwnAccount = { id: string; label: string; balanceCents: number };
+// What the assistant did in this turn, citable like any other fact (D16).
+export type Proposal = {
+  id: string;
+  amountCents: number;
+  fromAccountId: string;
+  toAccountId: string;
+  concept: string;
+  expiresAt: string;
+};
+export type Recipient = { id: string; name: string; label: string };
+export type SupportCase = { id: string; status: string };
+export type SourceKind = 'document' | 'account' | 'movement' | 'proposal' | 'recipient' | 'case';
+export const SOURCE_KINDS: SourceKind[] = [
+  'document',
+  'account',
+  'movement',
+  'proposal',
+  'recipient',
+  'case',
+];
 // What this turn actually put on the table: documents retrieved, bank data returned by tools.
 export type Facts = {
   documents: Map<string, AnswerSource>;
   accounts: Map<string, OwnAccount>;
   movements: Map<string, Movement>;
+  proposals: Map<string, Proposal>;
+  recipients: Map<string, Recipient>;
+  cases: Map<string, SupportCase>;
   // Every euro amount, in cents, that a source, a tool result or the conversation contains.
   amounts: Set<number>;
 };
@@ -20,7 +43,7 @@ export type RawEvidence = {
   answer: string;
   verified: {
     claim: string;
-    sources: { kind: 'document' | 'account' | 'movement'; id: string }[];
+    sources: { kind: SourceKind; id: string }[];
   }[];
   notVerified: { claim: string; reason: string }[];
   nextStep: string | null;
@@ -42,7 +65,10 @@ export type Source =
       description: string;
       amountCents: number;
       createdAt: string;
-    };
+    }
+  | ({ kind: 'proposal' } & Proposal)
+  | ({ kind: 'recipient' } & Recipient)
+  | ({ kind: 'case' } & SupportCase);
 export type Evidence = {
   verified: { claim: string; sources: Source[] }[];
   notVerified: { claim: string; reason: string }[];
@@ -53,6 +79,9 @@ export const newFacts = (): Facts => ({
   documents: new Map(),
   accounts: new Map(),
   movements: new Map(),
+  proposals: new Map(),
+  recipients: new Map(),
+  cases: new Map(),
   amounts: new Set(),
 });
 const AMOUNT = /(?:EUR|€)\s?(\d[\d,]*(?:\.\d+)?)|(\d[\d,]*(?:\.\d+)?)\s?(?:EUR\b|euros?\b|€)/gi;
@@ -93,6 +122,19 @@ function resolve(
     return a
       ? { source: { kind: 'account', id: a.id, label: a.label }, amounts: [a.balanceCents] }
       : null;
+  }
+  // A proposal, recipient or case that this turn's tools did not return backs nothing.
+  if (ref.kind === 'proposal') {
+    const p = facts.proposals.get(ref.id);
+    return p ? { source: { kind: 'proposal', ...p }, amounts: [p.amountCents] } : null;
+  }
+  if (ref.kind === 'recipient') {
+    const r = facts.recipients.get(ref.id);
+    return r ? { source: { kind: 'recipient', ...r }, amounts: [] } : null;
+  }
+  if (ref.kind === 'case') {
+    const c = facts.cases.get(ref.id);
+    return c ? { source: { kind: 'case', ...c }, amounts: [] } : null;
   }
   const m = facts.movements.get(ref.id);
   return m

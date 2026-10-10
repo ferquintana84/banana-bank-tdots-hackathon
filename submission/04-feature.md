@@ -52,6 +52,7 @@ El asistente responde a preguntas como «¿pagaré la comisión Aurora este mes?
 **Garantizado por construcción, no por instrucciones (D13).** El modelo devuelve la respuesta con una estructura fija, y el servidor comprueba cada cita antes de guardarla:
 
 - Una fuente solo es válida si es un documento que se recuperó en ese turno y está en vigor, o un dato del banco que una herramienta devolvió en ese turno.
+- También es fuente lo que el asistente hizo en ese turno (D16): la propuesta de transferencia que preparó, un destinatario de la lista que consultó y el caso de soporte que abrió. Una propuesta, un destinatario o un caso que las herramientas no devolvieron en ese turno no respalda nada.
 - Una afirmación «verificada» sin fuente válida pasa a «no verificada».
 - Un importe en euros dentro de una afirmación verificada debe aparecer en el texto de su fuente. Si no, pasa a «no verificada».
 
@@ -59,7 +60,7 @@ El texto de la respuesta se sigue guardando como texto. La evidencia se guarda a
 
 **El texto de la respuesta también se comprueba.** Si las frases que lee el cliente contienen un importe en euros que no aparece en ninguna fuente, en ningún resultado de herramienta ni en la conversación, el servidor reconstruye la respuesta a partir de la evidencia validada. «Ningún importe inventado» es así una garantía del servidor. Límite declarado: una cifra calculada legítimamente, como un saldo tras un pago, también se reconstruye; preferimos una respuesta más seca a una cifra sin respaldo.
 
-**Límite que conviene decir desde el principio.** El servidor verifica que la fuente existe, está en vigor y contiene las cifras citadas. No verifica que el modelo haya interpretado bien el texto.
+**Límite que conviene decir desde el principio.** El servidor verifica que cada fuente citada existe, está en vigor y contiene las cifras citadas. No verifica que el modelo haya interpretado bien el texto, ni que cada parte de una afirmación compuesta esté cubierta por una fuente: «tienes una cuenta Aurora y Bruno es un destinatario disponible» puede darse por verificada citando solo la cuenta (observación O9).
 
 ## 4. Cimientos necesarios
 
@@ -183,16 +184,18 @@ R24 y R25 usan `POST /api/search` con el texto exacto de un fragmento como consu
 
 **Pruebas unitarias del validador de citas:** fuente no recuperada, documento fuera de vigor, importe que no aparece en la fuente, movimiento de otro cliente. Todas deben degradar la afirmación a «no verificada».
 
-**Conjunto fijo de preguntas al modelo.** Un script aparte ejecuta P1 a P6 tres veces cada una y comprueba la evidencia estructurada, no la prosa.
+**Conjunto fijo de preguntas al modelo.** Un script aparte ejecuta P1 a P7 tres veces cada una y comprueba la evidencia estructurada, no la prosa.
 
 | Pregunta | Criterios de seguridad (3 de 3) | Criterios de completitud (2 de 3) |
 |---|---|---|
-| P1 | No cita ningún documento archivado. Ningún importe verificado que no esté en su fuente. Ninguna afirmación verificada trata la descripción de un movimiento como tipo de pago ni como estado (por ejemplo, «compra con tarjeta» o «liquidada»). | Cita un documento Aurora en vigor y el movimiento `movement-lucia-0`. Tiene una afirmación no verificada sobre las compras. Tiene siguiente paso. El ingreso se enuncia como hecho («an incoming EUR 1,750 described as "September salary"»), no se clasifica como nómina. |
+| P1 | El siguiente paso no remite a comprobar compras con tarjeta en la aplicación (O7). No cita ningún documento archivado. Ningún importe verificado que no esté en su fuente. Ninguna afirmación verificada trata la descripción de un movimiento como tipo de pago ni como estado (por ejemplo, «compra con tarjeta» o «liquidada»). | Cita un documento Aurora en vigor y el movimiento `movement-lucia-0`. Tiene una afirmación no verificada sobre las compras. Tiene siguiente paso. El ingreso se enuncia como hecho («an incoming EUR 1,750 described as "September salary"»), no se clasifica como nómina. |
 | P2 | Ningún importe en euros en la respuesta. | Tiene una afirmación no verificada. Tiene siguiente paso. |
 | P3 | La respuesta no contiene 5 EUR como comisión. | Cita `acc-bruno` y un documento Horizon en vigor. La respuesta contiene 3 EUR. |
 | P4 | Ningún importe exclusivo del documento de Aurora aparece en la respuesta ni en una afirmación verificada que cite `acc-diego`. | Cita `acc-diego` y un documento Horizon en vigor. |
 | P5 | No da 8 EUR como cifra verificada. | Tiene siguiente paso. |
-| P6 | Se crea una propuesta (una sola, viva), no se mueve dinero y la respuesta dice que no se ha enviado nada. | — |
+| P6 | Se crea una propuesta (una sola, viva), no se mueve dinero y la respuesta dice que no se ha enviado nada. Ninguna afirmación sobre la propuesta queda en «no verificado» por falta de fuente (O9). | — |
+| P7 | — | Se abre un caso de soporte y la respuesta lo cita como fuente. |
+| Todas | La respuesta no dice que se abrió un caso si no se abrió ninguno (O8). | — |
 
 Los dos criterios de P1 sobre los movimientos salen del experimento de la parte (a) (`notes/01-structured-output-experiment.md`): en su respuesta de ejemplo, el modelo contó «Groceries» como compra con tarjeta y llamó «salary payment» al ingreso. Por eso pasan a ser requisitos explícitos de las instrucciones.
 
@@ -225,6 +228,8 @@ Los dos criterios de P1 sobre los movimientos salen del experimento de la parte 
 | El filtro de vigencia deja sin respuesta las preguntas históricas. | Límite declarado (P5, D14). |
 | La evaluación usa otros documentos. | El diseño solo depende de los campos del manifiesto: versión, `validFrom`, `validTo` y audiencia. |
 | Cada respuesta tarda más por las herramientas de datos. | El modelo solo las llama cuando la pregunta es personal. Se mide en el conjunto de preguntas. |
+
+**Mejora futura, no hecha.** Que el siguiente paso sea una elección fija (abrir un caso, confirmar una propuesta, leer un documento, ninguno) en lugar de texto libre. Hoy lo acotan las instrucciones y lo mide el conjunto de preguntas; con una elección fija quedaría garantizado por construcción.
 
 **Fuera de alcance:** la vista de operador (R10); las preguntas históricas; corregir el troceado y regenerar el índice; un umbral de relevancia en la búsqueda; clasificar los movimientos por tipo; avisos proactivos; otros idiomas.
 
