@@ -7,7 +7,7 @@ export function seedApp() {
   const db = appDb();
   db.transaction(() => {
     db.exec(
-      'DELETE FROM messages; DELETE FROM conversations; DELETE FROM incidents; DELETE FROM intents; DELETE FROM approvals; DELETE FROM events; DELETE FROM runs; DELETE FROM chunks; DELETE FROM embedding_cache; DELETE FROM meta;',
+      'DELETE FROM message_evidence; DELETE FROM messages; DELETE FROM conversations; DELETE FROM incidents; DELETE FROM intents; DELETE FROM approvals; DELETE FROM events; DELETE FROM runs; DELETE FROM chunks; DELETE FROM embedding_cache; DELETE FROM meta;',
     );
     const conversation = db.prepare('INSERT INTO conversations VALUES(?,?,?,?)');
     const message = db.prepare('INSERT INTO messages VALUES(?,?,?,?,?,?)');

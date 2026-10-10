@@ -113,9 +113,14 @@ async function handler(request: Request, context: RouteContext) {
       }
       return json({
         conversation,
-        messages: db
-          .prepare('SELECT * FROM messages WHERE conversation_id=? ORDER BY created_at,rowid')
-          .all(path[1]),
+        // Each answer carries the evidence the server validated for it, if any.
+        messages: (
+          db
+            .prepare(
+              'SELECT m.*,e.data AS evidence FROM messages m LEFT JOIN message_evidence e ON e.message_id=m.id WHERE m.conversation_id=? ORDER BY m.created_at,m.rowid',
+            )
+            .all(path[1]) as any[]
+        ).map((m) => ({ ...m, evidence: m.evidence ? JSON.parse(m.evidence) : null })),
       });
     }
     if (route === 'actions' && request.method === 'POST') {
@@ -126,6 +131,7 @@ async function handler(request: Request, context: RouteContext) {
             'request_human',
             'operation_status',
             'list_accounts',
+            'list_movements',
             'search_documents',
           ]),
           arguments: z.unknown(),

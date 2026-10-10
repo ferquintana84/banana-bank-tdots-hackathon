@@ -24,6 +24,14 @@ export const toolDefinitions: FunctionTool[] = [
   },
   {
     type: 'function',
+    name: 'list_movements',
+    description:
+      "Get the current customer's recent account movements: amount, description and date.",
+    parameters: object({}),
+    strict: true,
+  },
+  {
+    type: 'function',
     name: 'search_documents',
     description: "Search the bank's documentation for policies and procedures.",
     parameters: object({ query: string }),
@@ -68,6 +76,9 @@ export async function runTool(name: string, args: unknown, ctx: ToolContext): Pr
           accounts: await bankRequest(ctx.userId, '/v1/accounts'),
           contacts: await bankRequest(ctx.userId, '/v1/contacts'),
         };
+        break;
+      case 'list_movements':
+        result = { movements: await bankRequest(ctx.userId, '/v1/movements') };
         break;
       case 'search_documents':
         result = {
