@@ -277,6 +277,19 @@ export default function Home() {
       if (g === generation.current) setError((e as Error).message);
     }
   }
+  // A cited document opens in the library, where the customer can read the original.
+  async function openSource(id: string) {
+    const g = generation.current;
+    setTab('documents');
+    try {
+      const [list, doc] = await Promise.all([api('documents'), api(`documents/${id}`)]);
+      if (g !== generation.current) return;
+      setDocs(list.documents);
+      setDocument(doc);
+    } catch (e) {
+      if (g === generation.current) setError((e as Error).message);
+    }
+  }
   async function submitTransfer() {
     const g = generation.current;
     setBusy(true);
@@ -659,6 +672,60 @@ export default function Home() {
                                   ),
                                 )}
                             </div>
+                            {m.evidence && (
+                              <div className="evidence">
+                                {m.evidence.verified.length > 0 && (
+                                  <>
+                                    <strong>Verified</strong>
+                                    <ul>
+                                      {m.evidence.verified.map((v: AnyRecord, k: number) => (
+                                        <li key={k}>
+                                          {v.claim}
+                                          <span className="evidence-sources">
+                                            {v.sources.map((s: AnyRecord) =>
+                                              s.kind === 'document' ? (
+                                                <button
+                                                  key={s.id}
+                                                  className="evidence-source"
+                                                  onClick={() => openSource(s.id)}
+                                                >
+                                                  {s.title} · v{s.version} · in force since{' '}
+                                                  {s.validFrom}
+                                                  {s.validTo ? ` until ${s.validTo}` : ''} ↗
+                                                </button>
+                                              ) : (
+                                                <span key={s.id} className="evidence-source">
+                                                  {s.kind === 'account'
+                                                    ? `Bank · ${s.label}`
+                                                    : `Bank · ${s.description} · ${money(s.amountCents)} · ${date(s.createdAt)}`}
+                                                </span>
+                                              ),
+                                            )}
+                                          </span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </>
+                                )}
+                                {m.evidence.notVerified.length > 0 && (
+                                  <>
+                                    <strong>Not verified</strong>
+                                    <ul>
+                                      {m.evidence.notVerified.map((n: AnyRecord, k: number) => (
+                                        <li key={k}>
+                                          {n.claim} <em>{n.reason}</em>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </>
+                                )}
+                                {m.evidence.nextStep && (
+                                  <p>
+                                    <strong>Next step</strong> {m.evidence.nextStep}
+                                  </p>
+                                )}
+                              </div>
+                            )}
                             <small>{date(m.created_at)}</small>
                           </div>
                         </div>
