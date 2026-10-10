@@ -10,7 +10,7 @@ La hace Fernando en el navegador.
 ## Resultado de la ejecución
 
 - **Fecha:** 2026-10-10, entre las 08:09 y las 08:26, tras `npm run reset`, sobre el commit `4317245`.
-- **Resultado:** seis secciones superadas y una con un paso que no cumple (V-1).
+- **Resultado:** seis secciones superadas en la primera ejecución y una con un paso que no cumplía (V-1), superado en la repetición de las 08:56 sobre el commit `9d1dd18`.
 - **Saldo de Lucía (Aurora account):** 4.007,50 EUR al empezar y 4.006,50 EUR al terminar: un solo pago confirmado, de 1 EUR.
 - **Quién lo comprobó:** Fernando, a mano. Las 14 capturas se abrieron una a una para comprobar que muestran lo que se cita.
 
@@ -65,13 +65,22 @@ Saldo de partida de Lucía (Aurora account) tras el reset: €4,007.50. Sale de 
 
 | Paso | Debo ver | Captura | Resultado |
 |---|---|---|---|
-| V-1 | El asistente dice que no se ha enviado nada. Bajo su respuesta no hay tarjeta de evidencia. Aparece la tarjeta «Review your transfer» con Confirm transfer y Cancel. | `V-1-chat-propuesta.png` | **No** |
+| V-1 | El asistente dice que no se ha enviado nada. Bajo su respuesta, la tarjeta de evidencia no contradice a la pantalla y cita la propuesta: solo «Verified», con la ficha «Proposal · €10.00 · expires 09:06». Aparece la tarjeta «Review your transfer» con Confirm transfer y Cancel. | Antes: `V-1-chat-propuesta.png`. Después: `V-1-bis-chat-propuesta.png` | Sí, en la repetición sobre `9d1dd18` |
 | V-2 | Tras cancelar, la conversación recoge «You cancelled this transfer. Nothing was sent.» y no aparece además el aviso amarillo (comprobación visual de O5). | `V-2-cancelada.png` | Sí |
 | V-3 | En Overview, ningún movimiento «Aceptación V» y saldo de €4,007.50. | `V-3-overview.png` | Sí |
 
-V-1 no cumple: bajo la propuesta aparece una tarjeta de evidencia. La lista predecía que no la habría, porque suponía que una transferencia no guarda evidencia; la suposición era del asistente de IA y era errónea. Véase O9.
+**Cambio de criterio en V-1 (D16).**
 
-**Resultado V:** NO SUPERADA en V-1. V-2 y V-3 superados; O5 queda comprobada en pantalla (la cancelación aparece en la conversación y no se repite como aviso).
+- **Criterio anterior:** bajo una propuesta de transferencia no hay tarjeta de evidencia. Suponía que una transferencia no guarda evidencia; la suposición era del asistente de IA y era errónea.
+- **Criterio nuevo:** hay tarjeta de evidencia, no contradice a la pantalla y cita la propuesta como fuente.
+- **Primera ejecución:** no cumple ninguno de los dos (`V-1-chat-propuesta.png`): una afirmación cierta sobre la propuesta aparecía como «Not verified». **Repetición:** cumple el nuevo (`V-1-bis-chat-propuesta.png`).
+
+**Comprobado además en pantalla durante la repetición**
+
+- Las propuestas caducadas salen solas del área de revisión, sin ninguna acción (`V-1-bis-vista-limpia.png`, tomada después de las 09:02).
+- La advertencia de pago idéntico aparece cuando la transferencia idéntica se completó y no cuando se canceló (`O10-propuesta-propia-abajo.png`).
+
+**Resultado V:** SUPERADA tras la repetición de V-1. V-2 y V-3 superados en la primera ejecución; O5 queda comprobada en pantalla (la cancelación aparece en la conversación y no se repite como aviso).
 
 ## W. Una conversación anterior a la Parte 2
 
@@ -126,3 +135,4 @@ Lo que Fernando vio durante la prueba y que ningún script comprueba. La numerac
 | O7 | El siguiente paso dice «Check your settled card purchases in the app», mientras la misma tarjeta dice que la lista de movimientos no identifica las compras con tarjeta. Remite al cliente a algo que la aplicación no muestra. | `T-2-fichas.png` | Se corrige (D16). |
 | O8 | La respuesta dice «I can ask a support operator» y el siguiente paso, «Ask me to open a support case». La capacidad existe (herramienta `request_human`, `src/agent/tools.ts`), pero nada comprobaba que un caso «abierto» se hubiera abierto de verdad. | `U-1-chat-historica.png` | Se corrige (D16). |
 | O9 | (a) Una afirmación cierta sobre la propuesta aparece en «Not verified» con «No valid source supports this statement», justo encima de esa propuesta. (b) Una afirmación compuesta se da por verificada citando solo la cuenta Aurora. | `V-1-chat-propuesta.png` | (a) se corrige (D16). (b) queda como límite declarado en `04-feature.md`. |
+| O10 | Bajo una conversación, el área de revisión muestra todas las propuestas vivas del cliente, la más antigua primero. Las que habían dejado los scripts aparecían por encima de la recién pedida, y la más antigua justo bajo el chat. Un cliente real también puede tener dos propuestas vivas. Cada tarjeta tiene su propio Confirm, así que no se ejecuta nada equivocado; el riesgo es qué tarjeta elige el cliente. | `V-1-bis-chat-propuesta.png`, `O10-propuesta-propia-abajo.png` | Se corrige (D17). |
