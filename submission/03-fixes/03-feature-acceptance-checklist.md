@@ -1,0 +1,114 @@
+# Parte 2. Prueba de aceptación humana
+
+La hace Fernando en el navegador.
+
+- **Cuándo:** una vez, con la Parte 2 completa (partes a, b, c y d).
+- **Capturas:** se guardan en `submission/notes/evidencia/aceptacion/` con el nombre indicado en cada paso.
+- **Garantía y modelo:** que una fuente citada exista, esté en vigor y contenga las cifras citadas lo garantiza el servidor. La redacción depende del modelo y puede variar.
+- **Letras de sección:** N, T, U, V, W, X e Y. Se saltan las que ya nombran otra cosa en la entrega: P (preguntas), O (observaciones) y R (casos del script).
+
+## Preparación
+
+1. Parar los servicios (Ctrl+C) y ejecutar: `nvm use`, `npm run reset`, `npm run dev`.
+2. En otra terminal: `nvm use` y `npm run scenario -- normal`.
+3. Recargar http://127.0.0.1:3000.
+4. No ejecutar `npm run repro` ni `npm run eval` durante la prueba: restablecen el banco.
+5. Vigilar la terminal de los servicios: no debe aparecer ninguna línea que termine en `_failed`.
+
+Saldo de partida de Lucía (Aurora account) tras el reset: €4,007.50. Sale de los datos iniciales del banco (`simulator/seed.ts:14`, `:31` y `:81-104`): 2.400,00 + 1.750,00 − 57,50 − 85,00.
+
+## N. Bruno: la comisión de su cuenta, con fuente que se puede abrir
+
+1. Abrir como Bruno. Conversación nueva: «How much is the monthly fee on my account?»
+2. Pulsar la ficha del documento Horizon en la tarjeta.
+
+| Paso | Debo ver | Captura | Resultado |
+|---|---|---|---|
+| N-1 | La respuesta dice 3 EUR. Bajo ella, la tarjeta con «Verified» y dos fichas: «Bank · Horizon account» y «Horizon · current fees · v2 · in force since 2026-09-01 ↗». | `N-1-chat-tarjeta.png` | |
+| N-2 | Tras pulsar la ficha, la página Documents con el original abierto: «Horizon · current fees», V2, «Effective: 2026-09-01», y el texto «The monthly fee for Horizon is EUR 3.» | `N-2-documento-original.png` | |
+
+**Resultado N:** ______
+
+## T. Lucía: ¿pagaré la comisión Aurora este mes?
+
+1. Abrir como Lucía. Conversación nueva: «Will I pay the Aurora account fee this month?»
+
+| Paso | Debo ver | Captura | Resultado |
+|---|---|---|---|
+| T-1 | La respuesta no dice ni «pagarás» ni «no pagarás». La tarjeta muestra a la vez «Verified» y «Not verified», y un «Next step». | `T-1-chat-tarjeta.png` | |
+| T-2 | En «Verified», la ficha del ingreso: «Bank · September salary · €1,750.00 · 02 Sep at 12:00», y una ficha de un documento Aurora con versión y vigencia. | La misma captura, o `T-2-fichas.png` si hace falta ampliar | |
+| T-3 | En «Not verified», las compras con tarjeta, con su motivo. | La misma captura | |
+
+**Resultado T:** ______
+
+## U. Lucía: una pregunta histórica
+
+1. Conversación nueva: «What was the Aurora fee in July 2026?»
+
+| Paso | Debo ver | Captura | Resultado |
+|---|---|---|---|
+| U-1 | Ninguna ficha de un documento archivado en la tarjeta, y ningún «EUR 8» en la respuesta ni en la tarjeta. Hay un «Next step». | `U-1-chat-historica.png` | |
+
+**Resultado U:** ______
+
+## V. Lucía: una transferencia por chat sigue igual
+
+1. Conversación nueva: «Send EUR 10 from my Aurora account to Bruno. Description: Aceptación V».
+2. Pulsar Cancel en la tarjeta de revisión.
+
+| Paso | Debo ver | Captura | Resultado |
+|---|---|---|---|
+| V-1 | El asistente dice que no se ha enviado nada. Bajo su respuesta no hay tarjeta de evidencia. Aparece la tarjeta «Review your transfer» con Confirm transfer y Cancel. | `V-1-chat-propuesta.png` | |
+| V-2 | Tras cancelar, la conversación recoge «You cancelled this transfer. Nothing was sent.» y no aparece además el aviso amarillo (comprobación visual de O5). | `V-2-cancelada.png` | |
+| V-3 | En Overview, ningún movimiento «Aceptación V» y saldo de €4,007.50. | `V-3-overview.png` | |
+
+**Resultado V:** ______
+
+## W. Una conversación anterior a la Parte 2
+
+1. Como Lucía, abrir la conversación «Getting started», de los datos iniciales.
+
+| Paso | Debo ver | Captura | Resultado |
+|---|---|---|---|
+| W-1 | Los mensajes de siempre, sin tarjeta de evidencia y sin ningún error. | `W-1-conversacion-antigua.png` | |
+
+**Resultado W:** ______
+
+## X. Cambio de cliente mientras se abre una fuente
+
+1. Como Lucía, en la conversación de la sección T, pulsar la ficha del documento Aurora e, inmediatamente, cambiar a Bruno en el selector.
+
+| Paso | Debo ver | Captura | Resultado |
+|---|---|---|---|
+| X-1 | El Overview de Bruno. No queda abierto el documento que pidió Lucía y no aparece ningún error. | `X-1-cambio-cliente.png` | |
+
+Es difícil de sincronizar a mano porque la respuesta local es casi instantánea. Se anota lo que ocurra; lo esperado, llegue antes el clic o el cambio, es que Bruno no herede nada de Lucía.
+
+**Resultado X:** ______
+
+## Y. La advertencia de pago idéntico dice la fecha bien (O4)
+
+1. Abrir como Lucía. Transfers → Aurora account → Bruno Vidal → 1 → «Aceptación Y» → Review transfer → Confirm transfer.
+2. Con exactamente los mismos datos, Review transfer otra vez.
+3. Pulsar Cancel en la tarjeta.
+
+| Paso | Debo ver | Captura | Resultado |
+|---|---|---|---|
+| Y-0 | Tras el paso 1, aviso de completada con referencia y el formulario vacío. | `Y-0-completada.png` | — |
+| Y-1 | Tras el paso 2, la advertencia de la tarjeta dice «You already completed an identical transfer on 10 Oct at {hora} (reference …)», con «on» y sin «at» repetido (comprobación visual de O4). | `Y-1-advertencia.png` | |
+| Y-2 | Tras cancelar, aviso «You cancelled this transfer. Nothing was sent.» y la tarjeta desaparece. | `Y-2-cancelada.png` | |
+| Y-3 | En Overview, un solo movimiento «Transfer · Aceptación Y» de −€1.00 y saldo de €4,006.50: el saldo anterior, €4,007.50, menos 1,00 EUR. | `Y-3-overview.png` | |
+
+**Resultado Y:** ______
+
+## Saldo final esperado
+
+Lucía, Aurora account: €4,006.50. Un solo pago confirmado, de 1 EUR (Y). La propuesta de V y la segunda de Y se cancelaron.
+
+## Observaciones humanas
+
+Lo que se vea durante la prueba y que ningún script comprueba.
+
+| ID | Observación | Estado |
+|---|---|---|
+| | | |
