@@ -1,8 +1,24 @@
 # Historia del repositorio
 # Generado con: git log --date=iso-strict --stat --format='%h | %ad | %s'
-# Hasta el commit ba700bb incluido. El commit que añade este archivo, y los posteriores, no aparecen.
-# Total: 88 commits.
+# Hasta el commit bc74102 incluido. El commit que añade este archivo, y los posteriores, no aparecen.
+# Total: 91 commits.
 
+bc74102 | 2026-10-10T16:01:22+02:00 | docs: add the video transcript and list the session files
+
+ submission/00-method.md                                        |    1 +
+ submission/README.md                                           |   13 +-
+ submission/ai-sessions/02-sesion-cierre.txt                    |  494 ++++++++
+ submission/ai-sessions/02-sesion-tramo-intermedio-derivado.txt | 8921 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ submission/transcript.vtt                                      |  442 +++++++
+ 5 files changed, 9868 insertions(+), 3 deletions(-)
+03d6f58 | 2026-10-10T13:35:30+02:00 | docs: use the Spain spelling of vídeo in the README
+
+ submission/README.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+c79057b | 2026-10-10T13:33:46+02:00 | docs: add the repository history for the ZIP
+
+ submission/notes/git-log.txt | 668 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 668 insertions(+)
 ba700bb | 2026-10-10T13:33:38+02:00 | docs: write the submission README
 
  submission/00-method.md |  2 +-
