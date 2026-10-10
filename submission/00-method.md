@@ -68,7 +68,7 @@ Los diagramas se escriben en Mermaid.
 | `submission/05-security-audit.md` | Auditoría de seguridad, de solo lectura. |
 | `submission/06-go-no-go.md` | Decisión final Go/No-Go y condiciones para producción. |
 | `submission/07-recorrido-visual.md` | Recorrido visual: el trabajo entero en capturas, para leer primero. |
-| `submission/notes/` | Notas de trabajo y observaciones sin verificar. |
+| `submission/notes/` | Notas de trabajo y observaciones sin verificar. Incluye `git-log.txt`, la historia completa del repositorio, porque el ZIP no lleva `.git`. |
 | `submission/ai-sessions/` | Sesiones de IA completas, en su exportación original. |
 | `submission/demo.mp4` | Vídeo de demostración de ambas partes. Se graba al final. |
 
