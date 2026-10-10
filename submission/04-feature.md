@@ -208,6 +208,12 @@ Los dos criterios de P1 sobre los movimientos salen del experimento de la parte 
 
 **Prueba de aceptación humana**, con capturas, al final.
 
+**Límites de esta evidencia**
+
+- **Tres ejecuciones por pregunta es una muestra pequeña.** 6 de 6 significa que los criterios se cumplieron 18 veces, no que se cumplan siempre.
+- **El criterio de P4 es estricto a propósito.** Una respuesta correcta que cite el umbral de 1.200 EUR de Aurora para decir que no se aplica lo incumpliría.
+- **Los documentos de producto se eligen por el título.** Un corpus que nombre sus documentos de otra forma no aportaría documentos de producto; la búsqueda por la pregunta seguiría funcionando.
+
 ## 8. Riesgos y fuera de alcance
 
 | Riesgo | Mitigación |

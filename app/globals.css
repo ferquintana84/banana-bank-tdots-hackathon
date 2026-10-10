@@ -677,6 +677,43 @@ footer span:last-child {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.evidence {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #d7e4cb;
+  white-space: normal;
+}
+.evidence ul {
+  margin: 4px 0 10px;
+  padding-left: 16px;
+}
+.evidence li {
+  margin-bottom: 6px;
+}
+.evidence em {
+  color: #6f7a64;
+}
+.evidence p {
+  margin: 0;
+}
+.evidence-sources {
+  display: block;
+}
+.evidence-source {
+  display: inline-block;
+  margin: 4px 6px 0 0;
+  padding: 2px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: #e9efe0;
+  color: inherit;
+  font: inherit;
+  font-size: 10px;
+}
+button.evidence-source {
+  cursor: pointer;
+  text-decoration: underline;
+}
 .bubble small {
   font-size: 8px;
   display: block;
