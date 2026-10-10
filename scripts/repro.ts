@@ -727,6 +727,18 @@ const cases: Case[] = [
 
 const cell = (value: string) => value.replace(/\|/g, '\\|').replace(/\s+/g, ' ');
 const git = (...args: string[]) => spawnSync('git', args, { encoding: 'utf8' }).stdout.trim();
+// Proposals this harness leaves unconfirmed must not leak into a manual test (O10). They are
+// cancelled through the app's own route. Conversations and support cases cannot be removed
+// this way: only npm run reset clears them.
+async function sweep() {
+  for (const user of ['lucia', 'bruno', 'diego']) {
+    const live = ((await app(user, 'dashboard')).data.approvals ?? []) as any[];
+    for (const a of live)
+      if (String(a.payload?.concept).startsWith('repro-'))
+        await app(user, `approvals/${a.id}/cancel`, {});
+  }
+}
+await sweep();
 const rows: string[] = [];
 let met = 0,
   total = 0;
@@ -750,6 +762,7 @@ for (const c of cases.filter((c) => !only || only.includes(c.id))) {
   );
   console.error(`${c.id}: ${verdict.replace(/\*/g, '')}`);
 }
+await sweep();
 // Leave the bank as a fresh setup would: seeded ledger, intermittent profile, seed 17.
 await admin('reset');
 

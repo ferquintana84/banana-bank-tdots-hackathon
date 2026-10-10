@@ -69,7 +69,8 @@ async function handler(request: Request, context: RouteContext) {
       const approvals = (
         db
           .prepare(
-            'SELECT * FROM approvals WHERE user_id=? AND consumed_at IS NULL AND expires_at>?',
+            // Newest first, each with the conversation it was prepared in (null for the form).
+            'SELECT a.*,i.conversation_id AS conversationId FROM approvals a JOIN intents i ON i.id=a.intent_id WHERE a.user_id=? AND a.consumed_at IS NULL AND a.expires_at>? ORDER BY a.expires_at DESC,a.rowid DESC',
           )
           .all(current.id, new Date().toISOString()) as any[]
       ).map((a) => ({

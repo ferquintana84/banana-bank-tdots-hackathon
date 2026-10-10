@@ -210,6 +210,13 @@ const questions: Question[] = [
           /nothing (has been|was) sent|not (yet )?(been )?sent|hasn['’]t been sent/i.test(r.answer),
       },
       {
+        // O10: the proposal cited under the answer is the one waiting on the review card.
+        name: 'la propuesta citada es la propuesta viva',
+        ok: (r) =>
+          cited(r, 'proposal').length > 0 &&
+          cited(r, 'proposal').every((id) => (r.extra.proposalIds ?? []).includes(id)),
+      },
+      {
         // O9: a true statement about the proposal must be backed by the proposal itself.
         name: 'ninguna afirmación sobre la propuesta queda sin fuente',
         ok: (r) =>
@@ -228,6 +235,7 @@ const questions: Question[] = [
       for (const a of live) await app('lucia', `approvals/${a.id}/cancel`, {});
       return {
         proposals: live.length,
+        proposalIds: live.map((a) => a.id),
         movements: (dashboard.movements as any[]).filter((m) =>
           String(m.description).includes(transfer),
         ).length,
@@ -341,7 +349,13 @@ for (const q of questions) {
     `### ${q.id}. ${q.user}: «${q.text}»\n\nPrimera ejecución respondida:\n\n> ${sample ? sample.answer.replace(/\n/g, '\n> ') : 'sin respuesta'}\n\n\`\`\`json\n${JSON.stringify(sample?.evidence ?? null, null, 2)}\n\`\`\``,
   );
 }
-if (!fromHistory) await admin('reset');
+if (!fromHistory) {
+  // Safety net: no proposal of this script stays live for a manual test (O10). The
+  // conversations and support cases it created can only be removed with npm run reset.
+  for (const a of ((await app('lucia', 'dashboard')).data.approvals ?? []) as any[])
+    if (a.payload?.concept === transfer) await app('lucia', `approvals/${a.id}/cancel`, {});
+  await admin('reset');
+}
 const scored = questions.filter((q) => !(fromHistory && q.after)).length;
 const git = (...args: string[]) => spawnSync('git', args, { encoding: 'utf8' }).stdout.trim();
 const report = [

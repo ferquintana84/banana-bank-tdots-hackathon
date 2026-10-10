@@ -193,7 +193,7 @@ R24 y R25 usan `POST /api/search` con el texto exacto de un fragmento como consu
 | P3 | La respuesta no contiene 5 EUR como comisión. | Cita `acc-bruno` y un documento Horizon en vigor. La respuesta contiene 3 EUR. |
 | P4 | Ningún importe exclusivo del documento de Aurora aparece en la respuesta ni en una afirmación verificada que cite `acc-diego`. | Cita `acc-diego` y un documento Horizon en vigor. |
 | P5 | No da 8 EUR como cifra verificada. | Tiene siguiente paso. |
-| P6 | Se crea una propuesta (una sola, viva), no se mueve dinero y la respuesta dice que no se ha enviado nada. Ninguna afirmación sobre la propuesta queda en «no verificado» por falta de fuente (O9). | — |
+| P6 | Se crea una propuesta (una sola, viva), no se mueve dinero y la respuesta dice que no se ha enviado nada. La propuesta citada en la evidencia es la propuesta viva (O10). Ninguna afirmación sobre la propuesta queda en «no verificado» por falta de fuente (O9). | — |
 | P7 | — | Se abre un caso de soporte y la respuesta lo cita como fuente. |
 | Todas | La respuesta no dice que se abrió un caso si no se abrió ninguno (O8). | — |
 
@@ -228,6 +228,10 @@ Los dos criterios de P1 sobre los movimientos salen del experimento de la parte 
 | El filtro de vigencia deja sin respuesta las preguntas históricas. | Límite declarado (P5, D14). |
 | La evaluación usa otros documentos. | El diseño solo depende de los campos del manifiesto: versión, `validFrom`, `validTo` y audiencia. |
 | Cada respuesta tarda más por las herramientas de datos. | El modelo solo las llama cuando la pregunta es personal. Se mide en el conjunto de preguntas. |
+
+**Qué garantiza el servidor y qué se ve solo en pantalla (D17).** Bajo una conversación se muestran solo las propuestas preparadas en ella; en el resto de páginas, todas las propuestas vivas del cliente, la más reciente primero. Ese filtro se ejecuta en el navegador. El servidor garantiza los datos sobre los que filtra (caso R27: cada propuesta lleva su conversación, y la del formulario, ninguna) y que cada Confirm ejecuta solo su propio identificador (casos R20 y R21). Que el filtro se aplica en pantalla lo verifica una captura humana.
+
+**Lo que los scripts dejan atrás.** `npm run repro` y `npm run eval` cancelan al terminar las propuestas que crean. Las conversaciones y los casos de soporte que crean no se pueden borrar desde la aplicación: solo los elimina `npm run reset`, que hay que ejecutar antes de una prueba manual.
 
 **Mejora futura, no hecha.** Que el siguiente paso sea una elección fija (abrir un caso, confirmar una propuesta, leer un documento, ninguno) en lugar de texto libre. Hoy lo acotan las instrucciones y lo mide el conjunto de preguntas; con una elección fija quedaría garantizado por construcción.
 

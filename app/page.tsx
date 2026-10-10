@@ -196,10 +196,15 @@ export default function Home() {
   }, [tab]);
   // A new proposal appears below the form or the chat: bring it into view.
   const proposals: AnyRecord[] = dashboard?.approvals || [];
+  // Under a conversation, only the proposals prepared in it; elsewhere, all of them, so a
+  // live proposal is never invisible.
+  const shownProposals = proposals.filter(
+    (a) => tab !== 'chat' || (!!conversationId && a.conversationId === conversationId),
+  );
   useEffect(() => {
-    if (proposals.length)
+    if (shownProposals.length)
       reviewCard.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, [proposals.length]);
+  }, [shownProposals.length]);
   // An expired proposal must not stay on screen as if it could still be confirmed.
   useEffect(() => {
     if (!proposals.length) return;
@@ -317,7 +322,7 @@ export default function Home() {
           amountCents: Math.round(Number(amount.replace(',', '.')) * 100),
           concept,
         },
-        conversationId,
+        // A form transfer belongs to no conversation, whichever chat was open before.
         intentId: transferIntent.current,
       });
       if (g !== generation.current) return;
@@ -704,6 +709,23 @@ export default function Home() {
                                                   {s.validFrom}
                                                   {s.validTo ? ` until ${s.validTo}` : ''} ↗
                                                 </button>
+                                              ) : s.kind === 'proposal' &&
+                                                shownProposals.some((a) => a.id === s.id) ? (
+                                                // The chip and its review card are the same proposal.
+                                                <button
+                                                  key={s.id}
+                                                  className="evidence-source"
+                                                  onClick={() =>
+                                                    window.document
+                                                      .getElementById(`proposal-${s.id}`)
+                                                      ?.scrollIntoView({
+                                                        behavior: 'smooth',
+                                                        block: 'center',
+                                                      })
+                                                  }
+                                                >
+                                                  {sourceLabel(s)} ↓
+                                                </button>
                                               ) : (
                                                 <span key={s.id} className="evidence-source">
                                                   {sourceLabel(s)}
@@ -901,10 +923,10 @@ export default function Home() {
                   ))}
                 </section>
               )}
-              {!operator && dashboard.approvals?.length > 0 && (
+              {!operator && shownProposals.length > 0 && (
                 <section className="panel approvals" ref={reviewCard}>
                   <h2>Review your transfer</h2>
-                  {dashboard.approvals.map((a: AnyRecord) => {
+                  {shownProposals.map((a: AnyRecord) => {
                     const from = dashboard.accounts?.find(
                       (x: AnyRecord) => x.id === a.payload.fromAccountId,
                     );
@@ -912,7 +934,7 @@ export default function Home() {
                       (x: AnyRecord) => x.id === a.payload.toAccountId,
                     );
                     return (
-                      <div key={a.id}>
+                      <div key={a.id} id={`proposal-${a.id}`}>
                         <p>
                           <strong>Amount: {money(a.payload.amountCents)}</strong>
                         </p>
