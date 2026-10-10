@@ -1,0 +1,668 @@
+# Historia del repositorio
+# Generado con: git log --date=iso-strict --stat --format='%h | %ad | %s'
+# Hasta el commit ba700bb incluido. El commit que añade este archivo, y los posteriores, no aparecen.
+# Total: 88 commits.
+
+ba700bb | 2026-10-10T13:33:38+02:00 | docs: write the submission README
+
+ submission/00-method.md |  2 +-
+ submission/README.md    | 74 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++----------
+ 2 files changed, 65 insertions(+), 11 deletions(-)
+109ad46 | 2026-10-10T13:31:45+02:00 | docs: add visual walkthrough
+
+ submission/00-method.md           |   1 +
+ submission/07-recorrido-visual.md | 135 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 136 insertions(+)
+ff455d0 | 2026-10-10T13:26:10+02:00 | docs: make the checklist line of the go/no-go exact
+
+ submission/06-go-no-go.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+673b757 | 2026-10-10T13:24:31+02:00 | docs: add go/no-go decision
+
+ submission/00-method.md   |  3 ++-
+ submission/06-go-no-go.md | 62 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 64 insertions(+), 1 deletion(-)
+e906f07 | 2026-10-10T13:22:48+02:00 | docs: record the injection check and update the audit
+
+ submission/03-fixes/03-feature-acceptance-checklist.md              |  17 +++++++++++------
+ submission/05-security-audit.md                                     |  10 ++++++----
+ submission/notes/evidencia/aceptacion/Z-0-bruno-envia.png           | Bin 0 -> 518645 bytes
+ submission/notes/evidencia/aceptacion/Z-0b-confirmada.png           | Bin 0 -> 415347 bytes
+ submission/notes/evidencia/aceptacion/Z-1-respuesta-y-evidencia.png | Bin 0 -> 548437 bytes
+ submission/notes/evidencia/aceptacion/Z-2-area-de-revision.png      | Bin 0 -> 397863 bytes
+ submission/notes/evidencia/aceptacion/Z-3-bruno.png                 | Bin 0 -> 529607 bytes
+ submission/notes/evidencia/aceptacion/Z-3-lucia.png                 | Bin 0 -> 552071 bytes
+ 8 files changed, 17 insertions(+), 10 deletions(-)
+a84362e | 2026-10-10T13:13:15+02:00 | docs: extend the screenshot check in the security audit to all 78
+
+ submission/05-security-audit.md | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+6fdf163 | 2026-10-10T13:12:37+02:00 | docs: add the injection check to the part 2 acceptance checklist
+
+ submission/03-fixes/03-feature-acceptance-checklist.md | 28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+e013079 | 2026-10-10T13:11:11+02:00 | docs: add security audit
+
+ submission/05-security-audit.md | 121 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 121 insertions(+)
+4081d94 | 2026-10-10T09:31:22+02:00 | docs: record the O10 re-check
+
+ submission/03-fixes/03-feature-acceptance-checklist.md       |  21 ++++++++++++++++++++-
+ submission/notes/evidencia/aceptacion/O10-bis-1.png          | Bin 0 -> 578511 bytes
+ submission/notes/evidencia/aceptacion/O10-bis-2.png          | Bin 0 -> 578945 bytes
+ submission/notes/evidencia/aceptacion/O10-bis-3.png          | Bin 0 -> 531120 bytes
+ submission/notes/evidencia/aceptacion/O10-bis-4-overview.png | Bin 0 -> 550456 bytes
+ 5 files changed, 20 insertions(+), 1 deletion(-)
+adaa7a3 | 2026-10-10T09:10:56+02:00 | test: record question set after the conversation filter
+
+ submission/03-fixes/evidence/questions-after-feature-f.md | 307 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 307 insertions(+)
+6af0556 | 2026-10-10T09:09:28+02:00 | test: record evidence after the conversation filter
+
+ submission/03-fixes/evidence/after-feature-f.md | 35 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
+9b874b7 | 2026-10-10T09:09:23+02:00 | feat: show each conversation only its own transfer proposals
+
+ app/api/[...path]/route.ts |  3 ++-
+ app/page.tsx               | 34 ++++++++++++++++++++++++++++------
+ scripts/eval-answers.ts    | 16 +++++++++++++++-
+ scripts/repro.ts           | 13 +++++++++++++
+ submission/02-decisions.md |  7 +++++++
+ submission/04-feature.md   |  6 +++++-
+ 6 files changed, 70 insertions(+), 9 deletions(-)
+d676630 | 2026-10-10T09:08:24+02:00 | test: record R27 before the conversation filter
+
+ submission/03-fixes/evidence/before-feature-f-r27.md | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+badaf3c | 2026-10-10T09:08:24+02:00 | test: add proposal origin and order case to reproduction script
+
+ scripts/repro.ts | 48 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 48 insertions(+)
+fca5cd9 | 2026-10-10T09:07:58+02:00 | docs: record the V-1 re-check and observation O10
+
+ submission/03-fixes/03-feature-acceptance-checklist.md               |  18 ++++++++++++++----
+ submission/notes/evidencia/aceptacion/O10-propuesta-propia-abajo.png | Bin 0 -> 679999 bytes
+ submission/notes/evidencia/aceptacion/V-1-bis-chat-propuesta.png     | Bin 0 -> 645970 bytes
+ submission/notes/evidencia/aceptacion/V-1-bis-vista-limpia.png       | Bin 0 -> 650735 bytes
+ 4 files changed, 14 insertions(+), 4 deletions(-)
+cee13c3 | 2026-10-10T08:54:20+02:00 | test: record question set after new source kinds
+
+ submission/03-fixes/evidence/questions-after-feature-e.md | 309 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 309 insertions(+)
+661b33e | 2026-10-10T08:52:38+02:00 | test: record evidence after new source kinds
+
+ submission/03-fixes/evidence/after-feature-e.md | 34 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
+9d1dd18 | 2026-10-10T08:52:32+02:00 | feat: cite proposals, recipients and support cases as sources
+
+ app/page.tsx                    | 15 ++++++++++++---
+ scripts/eval-answers.ts         | 56 ++++++++++++++++++++++++++++++++++++++++++++++++++++----
+ src/agent/evidence.ts           | 46 ++++++++++++++++++++++++++++++++++++++++++++--
+ src/agent/prompt.ts             |  4 +++-
+ src/agent/run.ts                | 21 +++++++++++++++++++--
+ submission/02-decisions.md      |  7 +++++++
+ submission/04-feature.md        | 13 +++++++++----
+ tests/evidence.test.ts          | 80 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/product-documents.test.ts | 30 ++++++++++++++++++++++++++++++
+ 9 files changed, 256 insertions(+), 16 deletions(-)
+9e7de38 | 2026-10-10T08:50:39+02:00 | docs: record part 2 human acceptance results
+
+ submission/03-fixes/02-acceptance-checklist.md                     |   4 ++--
+ submission/03-fixes/03-feature-acceptance-checklist.md             |  68 +++++++++++++++++++++++++++++++++++++++++---------------------------
+ submission/notes/evidencia/aceptacion/N-1-chat-tarjeta.png         | Bin 0 -> 427223 bytes
+ submission/notes/evidencia/aceptacion/N-2-documento-original.png   | Bin 0 -> 621328 bytes
+ submission/notes/evidencia/aceptacion/T-1-chat-tarjeta.png         | Bin 0 -> 553948 bytes
+ submission/notes/evidencia/aceptacion/T-2-fichas.png               | Bin 0 -> 568305 bytes
+ submission/notes/evidencia/aceptacion/U-1-chat-historica.png       | Bin 0 -> 462349 bytes
+ submission/notes/evidencia/aceptacion/V-1-chat-propuesta.png       | Bin 0 -> 575986 bytes
+ submission/notes/evidencia/aceptacion/V-2-cancelada.png            | Bin 0 -> 528107 bytes
+ submission/notes/evidencia/aceptacion/V-3-overview.png             | Bin 0 -> 564641 bytes
+ submission/notes/evidencia/aceptacion/W-1-conversacion-antigua.png | Bin 0 -> 404532 bytes
+ submission/notes/evidencia/aceptacion/X-1-cambio-cliente.png       | Bin 0 -> 521504 bytes
+ submission/notes/evidencia/aceptacion/Y-0-completada.png           | Bin 0 -> 433578 bytes
+ submission/notes/evidencia/aceptacion/Y-1-advertencia.png          | Bin 0 -> 542934 bytes
+ submission/notes/evidencia/aceptacion/Y-2-cancelada.png            | Bin 0 -> 419171 bytes
+ submission/notes/evidencia/aceptacion/Y-3-overview.png             | Bin 0 -> 559166 bytes
+ 16 files changed, 43 insertions(+), 29 deletions(-)
+ec3f963 | 2026-10-10T08:04:24+02:00 | docs: move the evidence lesson to the part 2 document
+
+ submission/03-fixes/01-transfer-integrity.md | 2 --
+ submission/04-feature.md                     | 4 ++++
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+789e160 | 2026-10-10T08:03:18+02:00 | docs: add part 2 acceptance checklist
+
+ submission/03-fixes/01-transfer-integrity.md           |   2 ++
+ submission/03-fixes/03-feature-acceptance-checklist.md | 114 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 116 insertions(+)
+c2e2bd0 | 2026-10-10T08:00:35+02:00 | test: record evidence after part 2 interface
+
+ submission/03-fixes/evidence/after-feature-d.md | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+4317245 | 2026-10-10T08:00:29+02:00 | feat: style the evidence card and note the limits of its evidence
+
+ app/globals.css          | 37 +++++++++++++++++++++++++++++++++++++
+ submission/04-feature.md |  6 ++++++
+ 2 files changed, 43 insertions(+)
+29b55df | 2026-10-10T08:00:08+02:00 | test: record evidence after part 2 interface
+
+ submission/03-fixes/evidence/after-feature-d.md | 34 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
+8aa73ad | 2026-10-10T08:00:03+02:00 | feat: show the validated evidence under each answer
+
+ app/page.tsx | 67 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 67 insertions(+)
+f7069e8 | 2026-10-10T07:57:00+02:00 | test: record question set after product documents
+
+ submission/03-fixes/evidence/questions-after-feature-c2.md | 247 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 247 insertions(+)
+616db96 | 2026-10-10T07:55:21+02:00 | test: record evidence after product documents
+
+ submission/03-fixes/evidence/after-feature-c2.md | 34 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
+bb5a233 | 2026-10-10T07:55:16+02:00 | feat: put the documents of the customer's own products on the table
+
+ package.json                                                       |   2 +-
+ scripts/eval-answers.ts                                            |  69 +++++++++++++++++++++++++++++++++-------
+ src/agent/run.ts                                                   |  25 ++++++++++++---
+ src/retrieval/search.ts                                            |  30 ++++++++++++++++++
+ submission/02-decisions.md                                         |   7 +++++
+ submission/03-fixes/evidence/questions-after-feature-c-rescored.md | 214 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ submission/04-feature.md                                           |   9 +++++-
+ tests/product-documents.test.ts                                    |  56 +++++++++++++++++++++++++++++++++
+ 8 files changed, 395 insertions(+), 17 deletions(-)
+573103b | 2026-10-10T07:53:59+02:00 | test: record first question set run
+
+ submission/03-fixes/evidence/questions-after-feature-c.md | 218 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 218 insertions(+)
+028b533 | 2026-10-10T07:48:30+02:00 | test: add fixed question set for the assistant
+
+ package.json            |   1 +
+ scripts/eval-answers.ts | 283 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 284 insertions(+)
+d7d8876 | 2026-10-10T07:47:45+02:00 | test: record evidence after part 2 agent changes
+
+ submission/03-fixes/evidence/after-feature-c.md | 34 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
+ab3f871 | 2026-10-10T07:47:40+02:00 | feat: answer with server-validated evidence and a movements tool
+
+ app/api/[...path]/route.ts |  12 +++++++++---
+ package.json               |   2 +-
+ src/agent/evidence.ts      | 155 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ src/agent/prompt.ts        |   9 ++++++++-
+ src/agent/run.ts           | 125 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--------
+ src/agent/tools.ts         |  11 +++++++++++
+ src/db.ts                  |   1 +
+ src/seed.ts                |   2 +-
+ submission/02-decisions.md |   1 +
+ submission/04-feature.md   |   7 ++++++-
+ tests/evidence.test.ts     | 166 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 11 files changed, 476 insertions(+), 15 deletions(-)
+858c5a5 | 2026-10-10T07:45:27+02:00 | test: record R26 before part 2 agent changes
+
+ submission/03-fixes/evidence/before-feature-c-r26.md | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+d3e6857 | 2026-10-10T07:45:26+02:00 | test: add movements tool case to reproduction script
+
+ scripts/repro.ts | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+f8a6070 | 2026-10-10T07:42:14+02:00 | test: record evidence after part 2 retrieval
+
+ submission/03-fixes/evidence/after-feature-b.md | 33 +++++++++++++++++++++++++++++++++
+ 1 file changed, 33 insertions(+)
+578f2c0 | 2026-10-10T07:42:09+02:00 | feat: retrieve only documents in force, with version and validity
+
+ package.json             |  2 +-
+ src/agent/prompt.ts      |  6 +++---
+ src/agent/run.ts         |  4 ++--
+ src/agent/tools.ts       |  6 +++---
+ src/retrieval/search.ts  | 58 ++++++++++++++++++++++++++++++++++++++++++++++++++++++----
+ submission/04-feature.md |  5 ++++-
+ tests/retrieval.test.ts  | 76 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 7 files changed, 143 insertions(+), 14 deletions(-)
+9bb3ee6 | 2026-10-10T07:41:22+02:00 | test: record retrieval cases before part 2
+
+ submission/03-fixes/evidence/before-feature-b.md | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+78f452f | 2026-10-10T07:41:21+02:00 | test: add retrieval cases to reproduction script
+
+ scripts/repro.ts | 54 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 54 insertions(+)
+c76557e | 2026-10-10T07:39:13+02:00 | test: add structured answer experiment and its result
+
+ scripts/experiment-structured-answer.ts             | 203 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ submission/notes/01-structured-output-experiment.md |  56 +++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 259 insertions(+)
+8ec7e65 | 2026-10-10T07:36:39+02:00 | docs: design part 2 feature
+
+ submission/02-decisions.md                  |   14 +
+ submission/04-feature.md                    |  208 +++++
+ submission/ai-sessions/01-sesion-parte1.txt | 7322 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 7544 insertions(+)
+9df4428 | 2026-10-09T22:35:44+02:00 | test: record evidence after fix 2 ui
+
+ submission/03-fixes/evidence/after-fix-2-ui.md | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+7b24d96 | 2026-10-09T22:35:39+02:00 | docs: mark O4 and O5 as corrected
+
+ submission/03-fixes/02-acceptance-checklist.md    | 4 ++--
+ submission/03-fixes/02-review-before-execution.md | 5 +++--
+ 2 files changed, 5 insertions(+), 4 deletions(-)
+0cf739f | 2026-10-09T22:35:39+02:00 | fix: show a chat transfer outcome only in the conversation
+
+ app/page.tsx               |  9 +++++++--
+ src/banking/actions.ts     | 21 ++++++++++++++-------
+ submission/02-decisions.md |  7 +++++++
+ tests/proposals.test.ts    |  8 ++++++--
+ 4 files changed, 34 insertions(+), 11 deletions(-)
+bd892fb | 2026-10-09T22:34:04+02:00 | docs: replace walkthrough screenshot without browser bookmarks
+
+ submission/notes/00-manual-walkthrough.md        |   1 +
+ submission/notes/evidencia/01-overview-lucia.png | Bin 607582 -> 880656 bytes
+ 2 files changed, 1 insertion(+)
+19506a2 | 2026-10-09T22:33:34+02:00 | docs: close fix 2 with before/after evidence
+
+ submission/03-fixes/02-review-before-execution.md | 38 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 37 insertions(+), 1 deletion(-)
+66dbab7 | 2026-10-09T22:31:08+02:00 | docs: record fix 2 human acceptance results
+
+ submission/03-fixes/02-acceptance-checklist.md                 | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++--------------------------------------------
+ submission/notes/evidencia/aceptacion/F-0-formulario.png       | Bin 0 -> 390556 bytes
+ submission/notes/evidencia/aceptacion/F-1-tarjeta.png          | Bin 0 -> 495977 bytes
+ submission/notes/evidencia/aceptacion/F-2-sin-movimiento.png   | Bin 0 -> 598260 bytes
+ submission/notes/evidencia/aceptacion/F-3-completada.png       | Bin 0 -> 569234 bytes
+ submission/notes/evidencia/aceptacion/F-4-formulario-vacio.png | Bin 0 -> 389870 bytes
+ submission/notes/evidencia/aceptacion/G-1-tarjeta.png          | Bin 0 -> 498019 bytes
+ submission/notes/evidencia/aceptacion/G-2-cancelada.png        | Bin 0 -> 403281 bytes
+ submission/notes/evidencia/aceptacion/G-3-overview.png         | Bin 0 -> 540970 bytes
+ submission/notes/evidencia/aceptacion/H-1-advertencia.png      | Bin 0 -> 530033 bytes
+ submission/notes/evidencia/aceptacion/H-2-completada.png       | Bin 0 -> 413059 bytes
+ submission/notes/evidencia/aceptacion/H-3-overview.png         | Bin 0 -> 541927 bytes
+ submission/notes/evidencia/aceptacion/I-1-chat-propuesta.png   | Bin 0 -> 475561 bytes
+ submission/notes/evidencia/aceptacion/I-2-chat-resultado.png   | Bin 0 -> 474350 bytes
+ submission/notes/evidencia/aceptacion/I-3-overview.png         | Bin 0 -> 549035 bytes
+ submission/notes/evidencia/aceptacion/J-0-chat-propuesta.png   | Bin 0 -> 486985 bytes
+ submission/notes/evidencia/aceptacion/J-1-chat-si.png          | Bin 0 -> 526814 bytes
+ submission/notes/evidencia/aceptacion/J-2-overview.png         | Bin 0 -> 617282 bytes
+ submission/notes/evidencia/aceptacion/J-3-cancelada.png        | Bin 0 -> 489994 bytes
+ submission/notes/evidencia/aceptacion/K-0-overview-antes.png   | Bin 0 -> 546056 bytes
+ submission/notes/evidencia/aceptacion/K-1-chat.png             | Bin 0 -> 439944 bytes
+ submission/notes/evidencia/aceptacion/K-2-overview-despues.png | Bin 0 -> 555030 bytes
+ submission/notes/evidencia/aceptacion/L-1-chat.png             | Bin 0 -> 401225 bytes
+ submission/notes/evidencia/aceptacion/M-C-0-propuesta.png      | Bin 0 -> 496915 bytes
+ submission/notes/evidencia/aceptacion/M-C-1-chat.png           | Bin 0 -> 493796 bytes
+ submission/notes/evidencia/aceptacion/M-C-2-overview.png       | Bin 0 -> 572307 bytes
+ submission/notes/evidencia/aceptacion/M-D-0-propuesta.png      | Bin 0 -> 505750 bytes
+ submission/notes/evidencia/aceptacion/M-D-1-chat.png           | Bin 0 -> 596886 bytes
+ submission/notes/evidencia/aceptacion/M-D-2-reintento.png      | Bin 0 -> 573696 bytes
+ submission/notes/evidencia/aceptacion/M-D-3-overview.png       | Bin 0 -> 628331 bytes
+ 30 files changed, 56 insertions(+), 44 deletions(-)
+b41cd3b | 2026-10-09T20:44:39+02:00 | docs: add fix 2 acceptance checklist
+
+ submission/03-fixes/02-acceptance-checklist.md | 156 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 156 insertions(+)
+627aa12 | 2026-10-09T20:42:00+02:00 | test: record evidence after fix 2c
+
+ submission/03-fixes/evidence/after-fix-2c.md | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+b069881 | 2026-10-09T20:41:55+02:00 | fix: add a review card to confirm or cancel a transfer
+
+ app/globals.css |   9 +++++++++
+ app/page.tsx    | 131 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++------------------------
+ 2 files changed, 116 insertions(+), 24 deletions(-)
+b1ed7c1 | 2026-10-09T20:39:29+02:00 | test: record evidence after fix 2b
+
+ submission/03-fixes/evidence/after-fix-2b.md | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+5ee7823 | 2026-10-09T20:39:24+02:00 | fix: make the agent propose transfers and record their outcome in the conversation
+
+ src/agent/run.ts        |  4 ++--
+ src/agent/tools.ts      |  3 ++-
+ src/banking/actions.ts  | 43 +++++++++++++++++++++++++++++++++++++++----
+ tests/proposals.test.ts | 47 ++++++++++++++++++++++++++++++++++++++++++++---
+ 4 files changed, 87 insertions(+), 10 deletions(-)
+a0d5349 | 2026-10-09T20:38:36+02:00 | test: record R23 before fix 2b
+
+ submission/03-fixes/evidence/before-fix-2b-r23.md | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+6d21213 | 2026-10-09T20:38:35+02:00 | test: add conversation write-back case to reproduction script
+
+ scripts/repro.ts | 29 +++++++++++++++++++++++++++++
+ 1 file changed, 29 insertions(+)
+c61b790 | 2026-10-09T20:38:33+02:00 | test: record evidence after fix 2a
+
+ submission/03-fixes/evidence/after-fix-2a.md | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+bca4a16 | 2026-10-09T20:36:51+02:00 | test: record evidence after fix 2a
+
+ submission/03-fixes/evidence/after-fix-2a.md | 30 ++++++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
+71cad24 | 2026-10-09T20:36:45+02:00 | fix: require explicit confirmation before executing a transfer
+
+ app/api/[...path]/route.ts                        |  38 ++++++---------
+ package.json                                      |   2 +-
+ src/banking/actions.ts                            | 365 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--------------------------
+ src/banking/outcome.ts                            |  22 ++++-----
+ src/telemetry.ts                                  |   1 +
+ submission/03-fixes/02-review-before-execution.md |   2 +
+ tests/proposals.test.ts                           | 104 +++++++++++++++++++++++++++++++++++++++++
+ tests/transfer-outcome.test.ts                    |  20 ++++++--
+ 8 files changed, 449 insertions(+), 105 deletions(-)
+ea9d353 | 2026-10-09T20:32:41+02:00 | test: record evidence before fix 2
+
+ submission/03-fixes/evidence/before-fix-2.md | 30 ++++++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
+29759ee | 2026-10-09T20:32:36+02:00 | test: add review-before-execution cases and rewrite R15 for D11
+
+ scripts/repro.ts | 130 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-------
+ 1 file changed, 123 insertions(+), 7 deletions(-)
+95d49e5 | 2026-10-09T20:32:07+02:00 | docs: design fix 2 review before execution
+
+ submission/02-decisions.md                        |  11 +++++++++
+ submission/03-fixes/02-review-before-execution.md | 174 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 185 insertions(+)
+b3679ac | 2026-10-09T20:23:42+02:00 | docs: close fix 1 with before/after evidence
+
+ submission/03-fixes/01-transfer-integrity.md | 38 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 37 insertions(+), 1 deletion(-)
+bf7c59a | 2026-10-09T20:16:59+02:00 | docs: record acceptance of the transfer status display
+
+ submission/03-fixes/01-acceptance-checklist.md                   |  25 +++++++++++++++++++++++--
+ submission/notes/evidencia/aceptacion/B-5-0-formulario.png       | Bin 0 -> 405833 bytes
+ submission/notes/evidencia/aceptacion/B-5-inicio.png             | Bin 0 -> 548282 bytes
+ submission/notes/evidencia/aceptacion/B-5-overview.png           | Bin 0 -> 610193 bytes
+ submission/notes/evidencia/aceptacion/B-5-sin-contradiccion.png  | Bin 0 -> 456382 bytes
+ submission/notes/evidencia/aceptacion/B-6-0-aviso-completada.png | Bin 0 -> 480696 bytes
+ submission/notes/evidencia/aceptacion/B-6-cambio-pestana.png     | Bin 0 -> 456324 bytes
+ 7 files changed, 23 insertions(+), 2 deletions(-)
+1cb6acf | 2026-10-09T20:00:29+02:00 | test: record evidence after fix 1 ui
+
+ submission/03-fixes/evidence/after-fix-1-ui.md | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+82f4856 | 2026-10-09T20:00:25+02:00 | fix: show each transfer status in one place
+
+ app/page.tsx                                 | 43 +++++++++++++++++++++++++++----------------
+ src/agent/run.ts                             |  2 +-
+ src/banking/actions.ts                       |  3 ++-
+ submission/02-decisions.md                   |  7 +++++++
+ submission/03-fixes/01-transfer-integrity.md |  2 ++
+ 5 files changed, 39 insertions(+), 18 deletions(-)
+fed2736 | 2026-10-09T19:54:44+02:00 | docs: record fix 1 human acceptance results
+
+ submission/03-fixes/01-acceptance-checklist.md                |  75 ++++++++++++++++++++++++++++++++++++++++++++++++++++-----------------------
+ submission/notes/evidencia/aceptacion/0-historico-lucia.png   | Bin 0 -> 617660 bytes
+ submission/notes/evidencia/aceptacion/A-0-formulario.png      | Bin 0 -> 429082 bytes
+ submission/notes/evidencia/aceptacion/A-1-aviso.png           | Bin 0 -> 456772 bytes
+ submission/notes/evidencia/aceptacion/A-2-overview-lucia.png  | Bin 0 -> 592833 bytes
+ submission/notes/evidencia/aceptacion/A-3-overview-bruno.png  | Bin 0 -> 523927 bytes
+ submission/notes/evidencia/aceptacion/B-0-formulario.png      | Bin 0 -> 390332 bytes
+ submission/notes/evidencia/aceptacion/B-1-aviso-pendiente.png | Bin 0 -> 497314 bytes
+ submission/notes/evidencia/aceptacion/B-3-reenvio.png         | Bin 0 -> 467429 bytes
+ submission/notes/evidencia/aceptacion/B-4-overview.png        | Bin 0 -> 604214 bytes
+ submission/notes/evidencia/aceptacion/C-0-chat-previo.png     | Bin 0 -> 481273 bytes
+ submission/notes/evidencia/aceptacion/C-1-chat.png            | Bin 0 -> 488790 bytes
+ submission/notes/evidencia/aceptacion/C-2-overview.png        | Bin 0 -> 616360 bytes
+ submission/notes/evidencia/aceptacion/D-0-chat-previo.png     | Bin 0 -> 490838 bytes
+ submission/notes/evidencia/aceptacion/D-1-chat-pendiente.png  | Bin 0 -> 533232 bytes
+ submission/notes/evidencia/aceptacion/D-2-chat-reintento.png  | Bin 0 -> 599274 bytes
+ submission/notes/evidencia/aceptacion/D-3-overview.png        | Bin 0 -> 641964 bytes
+ 17 files changed, 52 insertions(+), 23 deletions(-)
+3881584 | 2026-10-09T19:19:15+02:00 | test: record evidence after fix 1c
+
+ submission/03-fixes/evidence/after-fix-1c.md | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+0e45790 | 2026-10-09T19:19:11+02:00 | fix: record verifiable evidence for each transfer step
+
+ src/banking/actions.ts  | 52 ++++++++++++++++++++++++++++++++++++++++++----------
+ src/banking/client.ts   |  4 +++-
+ src/banking/dispatch.ts | 18 ++++++++++++++----
+ src/telemetry.ts        | 18 +++++++++++++++++-
+ 4 files changed, 76 insertions(+), 16 deletions(-)
+00c9229 | 2026-10-09T19:18:34+02:00 | test: record R17 before fix 1c
+
+ submission/03-fixes/evidence/before-fix-1c-r17.md | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+0241613 | 2026-10-09T19:18:33+02:00 | test: add evidence-per-step case to reproduction script
+
+ scripts/repro.ts | 38 ++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 36 insertions(+), 2 deletions(-)
+eb25985 | 2026-10-09T19:11:28+02:00 | test: record evidence after fix 1b
+
+ submission/03-fixes/evidence/after-fix-1b.md | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+19dfa28 | 2026-10-09T19:11:17+02:00 | docs: record fix 1 lessons, D9 and acceptance checklist
+
+ submission/02-decisions.md                     |  7 +++++++
+ submission/03-fixes/01-acceptance-checklist.md | 72 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ submission/03-fixes/01-transfer-integrity.md   | 10 ++++++++++
+ 3 files changed, 89 insertions(+)
+c6f3656 | 2026-10-09T19:11:17+02:00 | test: record evidence after fix 1b
+
+ submission/03-fixes/evidence/after-fix-1b.md | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+315f889 | 2026-10-09T19:11:12+02:00 | fix: reconcile unverified transfers when the customer reads
+
+ app/api/[...path]/route.ts |  8 +++++---
+ app/page.tsx               | 21 +++++++++++++++++++++
+ package.json               |  2 +-
+ src/agent/run.ts           | 12 ++++++++++--
+ src/agent/tools.ts         | 13 +++++++------
+ src/banking/actions.ts     | 79 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++----
+ tests/reconcile.test.ts    | 19 +++++++++++++++++++
+ 7 files changed, 138 insertions(+), 16 deletions(-)
+0015257 | 2026-10-09T19:03:45+02:00 | test: record R16 before fix 1b
+
+ submission/03-fixes/evidence/before-fix-1b-r16.md | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+69ab340 | 2026-10-09T19:03:21+02:00 | test: add reconciliation-on-read case to reproduction script
+
+ scripts/repro.ts | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+5bb72aa | 2026-10-09T19:00:39+02:00 | test: record evidence after fix 1a
+
+ submission/03-fixes/evidence/after-fix-1a.md | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+ba8219d | 2026-10-09T19:00:30+02:00 | test: add identical-request case to reproduction script
+
+ scripts/repro.ts                             | 24 +++++++++++++++++++++++-
+ submission/03-fixes/01-transfer-integrity.md |  3 +++
+ 2 files changed, 26 insertions(+), 1 deletion(-)
+7e1e39d | 2026-10-09T19:00:07+02:00 | test: record evidence after fix 1a
+
+ submission/03-fixes/evidence/after-fix-1a.md | 23 +++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
+1a11187 | 2026-10-09T19:00:02+02:00 | fix: make transfers verifiable under bank uncertainty
+
+ app/page.tsx                   |  45 ++++++++++++++++++++++++------
+ package.json                   |   2 +-
+ src/agent/run.ts               |   5 ++--
+ src/banking/actions.ts         | 243 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++---------------------------
+ src/banking/client.ts          |   7 ++++-
+ src/banking/dispatch.ts        |  77 ++++++++++++++++++++++++++++++++++++++++-----------
+ src/banking/outcome.ts         |  68 +++++++++++++++++++++++++++++++++++++++++++++
+ src/db.ts                      |   4 +++
+ src/seed.ts                    |   4 ++-
+ tests/transfer-outcome.test.ts |  91 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 10 files changed, 475 insertions(+), 71 deletions(-)
+a9abeed | 2026-10-09T18:51:03+02:00 | test: record baseline evidence
+
+ submission/03-fixes/evidence/baseline.md | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+20e66fb | 2026-10-09T18:50:54+02:00 | test: add reject-before case to reproduction script
+
+ scripts/repro.ts | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+bd125de | 2026-10-09T18:50:44+02:00 | docs: design fix 1 transfer integrity
+
+ submission/02-decisions.md                   |   7 +++++++
+ submission/03-fixes/01-transfer-integrity.md | 147 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 154 insertions(+)
+2f9ed6a | 2026-10-09T18:21:29+02:00 | test: record baseline evidence
+
+ submission/03-fixes/evidence/baseline.md | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+7526787 | 2026-10-09T18:21:16+02:00 | test: add deterministic reproduction script
+
+ package.json               |   1 +
+ scripts/repro.ts           | 418 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ submission/02-decisions.md |   7 +++
+ 3 files changed, 426 insertions(+)
+e0b9c02 | 2026-10-09T18:15:49+02:00 | docs: add walkthrough screenshots
+
+ submission/notes/evidencia/01-overview-lucia.png               | Bin 0 -> 607582 bytes
+ submission/notes/evidencia/02-documentos-68-fuentes.png        | Bin 0 -> 432122 bytes
+ submission/notes/evidencia/03-asistente-nueva-conversacion.png | Bin 0 -> 394473 bytes
+ submission/notes/evidencia/04-chat-cuentas.png                 | Bin 0 -> 385645 bytes
+ submission/notes/evidencia/05-chat-comision-aurora.png         | Bin 0 -> 447026 bytes
+ submission/notes/evidencia/06-selector-usuario-loading.png     | Bin 0 -> 189228 bytes
+ 6 files changed, 0 insertions(+), 0 deletions(-)
+e600d93 | 2026-10-09T18:13:06+02:00 | docs: add diagnosis by inversion
+
+ submission/01-diagnosis.md | 233 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ submission/02-decisions.md |  14 ++++++++++
+ 2 files changed, 247 insertions(+)
+9fe61ec | 2026-10-09T17:57:50+02:00 | docs: add decision log
+
+ submission/02-decisions.md | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+d5f0319 | 2026-10-09T17:55:21+02:00 | docs: add working method and manual walkthrough
+
+ CLAUDE.md                                 |  1 +
+ submission/00-method.md                   | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ submission/notes/00-manual-walkthrough.md | 38 ++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 114 insertions(+)
+5d9c8da | 2026-10-09T17:25:20+02:00 | chore: estado inicial del reto, sin modificar
+
+ .env.example                                         |   12 +
+ .gitignore                                           |   12 +
+ .nvmrc                                               |    1 +
+ .prettierrc.json                                     |    1 +
+ AGENTS.md                                            |    9 +
+ CLAUDE.md                                            |    1 +
+ README.md                                            |  113 ++++++++++
+ app/api/[...path]/route.ts                           |  233 ++++++++++++++++++++
+ app/globals.css                                      | 1387 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ app/layout.tsx                                       |   13 ++
+ app/page.tsx                                         | 1001 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ docs/challenge.md                                    |   95 ++++++++
+ docs/challenge.pdf                                   |  Bin 0 -> 70724 bytes
+ docs/contracts.md                                    |   69 ++++++
+ fixtures/conversations.json                          | 1010 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ fixtures/documents/archive-aurora-1.md               |   25 +++
+ fixtures/documents/archive-aurora-9.md               |   25 +++
+ fixtures/documents/archive-cloud-11.md               |   25 +++
+ fixtures/documents/archive-cloud-3.md                |   25 +++
+ fixtures/documents/archive-community-8.md            |   25 +++
+ fixtures/documents/archive-family-5.md               |   25 +++
+ fixtures/documents/archive-horizon-10.md             |   25 +++
+ fixtures/documents/archive-horizon-2.md              |   25 +++
+ fixtures/documents/archive-professional-6.md         |   25 +++
+ fixtures/documents/archive-travel-12.md              |   25 +++
+ fixtures/documents/archive-travel-4.md               |   25 +++
+ fixtures/documents/archive-young-7.md                |   25 +++
+ fixtures/documents/aurora-conditions-2026.md         |   27 +++
+ fixtures/documents/aurora-fees-2026.md               |   27 +++
+ fixtures/documents/aurora-operations-2026.html       |    1 +
+ fixtures/documents/cloud-conditions-2026.md          |   27 +++
+ fixtures/documents/cloud-fees-2026.md                |   27 +++
+ fixtures/documents/cloud-operations-2026.html        |    1 +
+ fixtures/documents/community-conditions-2026.md      |   27 +++
+ fixtures/documents/community-fees-2026.md            |   27 +++
+ fixtures/documents/community-operations-2026.html    |    1 +
+ fixtures/documents/context-guide-1.md                |   25 +++
+ fixtures/documents/context-guide-2.md                |   25 +++
+ fixtures/documents/context-guide-3.md                |   25 +++
+ fixtures/documents/context-guide-4.md                |   25 +++
+ fixtures/documents/family-conditions-2026.md         |   27 +++
+ fixtures/documents/family-fees-2026.md               |   27 +++
+ fixtures/documents/family-operations-2026.html       |    1 +
+ fixtures/documents/faq-aurora-waiver.md              |   25 +++
+ fixtures/documents/faq-balance.md                    |   25 +++
+ fixtures/documents/faq-cancellation.md               |   25 +++
+ fixtures/documents/faq-changed-amount.md             |   25 +++
+ fixtures/documents/faq-cloud-account.md              |   25 +++
+ fixtures/documents/faq-confirmation.md               |   25 +++
+ fixtures/documents/faq-date.md                       |   25 +++
+ fixtures/documents/faq-description.md                |   25 +++
+ fixtures/documents/faq-history.md                    |   25 +++
+ fixtures/documents/faq-human.md                      |   25 +++
+ fixtures/documents/faq-insufficient-funds.md         |   25 +++
+ fixtures/documents/faq-internal-transfer.md          |   25 +++
+ fixtures/documents/faq-limits.md                     |   25 +++
+ fixtures/documents/faq-lost-response.md              |   25 +++
+ fixtures/documents/faq-personal-data.md              |   25 +++
+ fixtures/documents/faq-recipient.md                  |   25 +++
+ fixtures/documents/faq-reference.md                  |   25 +++
+ fixtures/documents/faq-two-accounts.md               |   25 +++
+ fixtures/documents/faq-versions.md                   |   25 +++
+ fixtures/documents/faq-young-account.md              |   25 +++
+ fixtures/documents/horizon-conditions-2026.md        |   27 +++
+ fixtures/documents/horizon-fees-2026.md              |   27 +++
+ fixtures/documents/horizon-operations-2026.html      |    1 +
+ fixtures/documents/manifest.json                     |  802 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ fixtures/documents/notice-aurora.csv                 |   21 ++
+ fixtures/documents/notice-cloud.csv                  |   21 ++
+ fixtures/documents/notice-community.csv              |   21 ++
+ fixtures/documents/notice-family.csv                 |   21 ++
+ fixtures/documents/notice-horizon.csv                |   21 ++
+ fixtures/documents/notice-professional.csv           |   21 ++
+ fixtures/documents/notice-travel.csv                 |   21 ++
+ fixtures/documents/notice-young.csv                  |   21 ++
+ fixtures/documents/procedure-1.md                    |   25 +++
+ fixtures/documents/procedure-10.md                   |   25 +++
+ fixtures/documents/procedure-11.md                   |   25 +++
+ fixtures/documents/procedure-12.md                   |   25 +++
+ fixtures/documents/procedure-2.md                    |   25 +++
+ fixtures/documents/procedure-3.md                    |   25 +++
+ fixtures/documents/procedure-4.md                    |   25 +++
+ fixtures/documents/procedure-5.md                    |   25 +++
+ fixtures/documents/procedure-6.md                    |   25 +++
+ fixtures/documents/procedure-7.md                    |   25 +++
+ fixtures/documents/procedure-8.md                    |   25 +++
+ fixtures/documents/procedure-9.md                    |   25 +++
+ fixtures/documents/professional-conditions-2026.md   |   27 +++
+ fixtures/documents/professional-fees-2026.md         |   27 +++
+ fixtures/documents/professional-operations-2026.html |    1 +
+ fixtures/documents/travel-conditions-2026.md         |   27 +++
+ fixtures/documents/travel-fees-2026.md               |   27 +++
+ fixtures/documents/travel-operations-2026.html       |    1 +
+ fixtures/documents/young-conditions-2026.md          |   27 +++
+ fixtures/documents/young-fees-2026.md                |   27 +++
+ fixtures/documents/young-operations-2026.html        |    1 +
+ fixtures/embeddings/index.json.gz                    |  Bin 0 -> 1556384 bytes
+ next.config.ts                                       |    3 +
+ package-lock.json                                    | 1649 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ package.json                                         |   40 ++++
+ scripts/dev.ts                                       |   78 +++++++
+ scripts/doctor.ts                                    |   36 +++
+ scripts/ingest.ts                                    |   11 +
+ scripts/reset.ts                                     |   20 ++
+ scripts/scenario.ts                                  |   19 ++
+ scripts/setup.ts                                     |   13 ++
+ simulator/bank.ts                                    |  140 ++++++++++++
+ simulator/db.ts                                      |   26 +++
+ simulator/seed.ts                                    |  133 ++++++++++++
+ simulator/server.ts                                  |  166 ++++++++++++++
+ src/agent/prompt.ts                                  |    8 +
+ src/agent/run.ts                                     |  129 +++++++++++
+ src/agent/tools.ts                                   |  123 +++++++++++
+ src/auth.ts                                          |   46 ++++
+ src/banking/actions.ts                               |   70 ++++++
+ src/banking/authorization.ts                         |   12 +
+ src/banking/client.ts                                |   40 ++++
+ src/banking/dispatch.ts                              |   19 ++
+ src/config.ts                                        |   18 ++
+ src/db.ts                                            |   34 +++
+ src/ingestion/chunker.ts                             |   20 ++
+ src/ingestion/pipeline.ts                            |   43 ++++
+ src/operator/view.ts                                 |   23 ++
+ src/people.ts                                        |   16 ++
+ src/retrieval/embeddings.ts                          |   63 ++++++
+ src/retrieval/search.ts                              |   26 +++
+ src/retrieval/store.ts                               |   85 ++++++++
+ src/seed.ts                                          |   72 ++++++
+ src/telemetry.ts                                     |   16 ++
+ src/types.ts                                         |   57 +++++
+ submission/README.md                                 |   22 ++
+ tests/invariants.test.ts                             |  221 +++++++++++++++++++
+ tsconfig.json                                        |   33 +++
+ 133 files changed, 10097 insertions(+)
