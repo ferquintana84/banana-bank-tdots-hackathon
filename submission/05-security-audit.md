@@ -27,7 +27,7 @@ Ninguna vía encontrada permite mover dinero sin que el titular pulse Confirm, n
 | Los registros no imprimen secretos ni datos | Lectura de todas las llamadas a `console.*` | Los errores registran solo el nombre del error (`src/banking/actions.ts:53`, `route.ts:226`) | OK |
 | La clave solo se usa en el servidor | Lectura de dónde se lee | `src/retrieval/embeddings.ts:28-29`; el proceso del banco arranca sin ella (`scripts/dev.ts:18-19`) | OK |
 | Secretos por defecto en `.env.example` | Lectura | Tres valores de desarrollo (`banana-local-*`), declarados como tales en el propio archivo | Fuera de alcance (S5) |
-| Capturas de pantalla | Abiertas una a una 64 de las 78: las 6 del recorrido manual y 58 de las 72 de aceptación | Ninguna de las abiertas muestra claves, cookies ni datos reales. Las 14 no abiertas por el auditor son de la primera aceptación de Fix 1 (véase «Lo que no se pudo comprobar») | OK en las abiertas |
+| Capturas de pantalla | Abiertas una a una las 78 que había en el momento de la auditoría: las 6 del recorrido manual y las 72 de aceptación | Ninguna muestra claves, cookies, marcadores ni datos reales; solo la aplicación con sus personas y cuentas ficticias. Una, `aceptacion/0-historico-lucia.png`, incluye la barra del navegador: controles de ventana, la dirección `127.0.0.1` e iconos, sin marcadores ni pestañas | OK |
 | Captura sustituida por privacidad | Comparación de las dos versiones de `01-overview-lucia.png` | La antigua, que sigue en el historial de git, muestra marcadores del navegador y el título de una pestaña; ninguna clave | OK, con límite: `.git` no va en el ZIP |
 
 ## 2. Autorización
@@ -114,7 +114,7 @@ No se actualiza nada (D2): cambiar dependencias el día de la entrega alteraría
 
 - **`.env.local` no se abrió** (regla 6 del método). La ausencia de claves se comprobó por patrón; una clave con otro formato no se detectaría.
 - **La exportación de la sesión de hoy está pendiente.** Solo se analizó `ai-sessions/01-sesion-parte1.txt`. La búsqueda de secretos se repite sobre la segunda exportación antes del ZIP.
-- **14 capturas no las abrió el auditor.** Son de la primera aceptación de Fix 1: `0-historico-lucia`, `A-0` a `A-3`, `B-0`, `B-3`, `B-4`, `C-0` a `C-2`, `D-0`, `D-2` y `D-3`. Las tomó y revisó Fernando; el auditor solo comprobó entonces sus nombres.
+- **Las capturas añadidas después de esta auditoría** (por ejemplo, las de la sección Z) no están cubiertas por la fila de capturas; se revisan al registrarlas.
 - **No se hizo ninguna prueba dinámica de inyección** en esta auditoría. El área 3 es análisis por lectura; la prueba manual está prevista como sección Z de la lista de aceptación de la Parte 2.
 - **No se repitió ahora la confirmación entre clientes**, porque escribe datos. Se apoya en los casos R20 y R21 y en las pruebas.
 - **El ZIP no existe todavía.** Que no incluya `.env*`, `.git`, `.data` ni `node_modules` hay que comprobarlo al generarlo.
