@@ -30,6 +30,8 @@ const label = option('--label');
 const only = option('--only')?.split(',');
 const run = Date.now().toString(36);
 const appUrl = `http://127.0.0.1:${config.appPort}`;
+// The exercise's document reference date (README), independent of the day it runs.
+const REFERENCE_DATE = '2026-09-24';
 const json = { 'Content-Type': 'application/json' };
 const eur = (cents: number) =>
   `${new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2 }).format(cents / 100)} EUR`;
@@ -597,6 +599,58 @@ const cases: Case[] = [
           ? `En la conversación: «${written.content}»`
           : 'En la conversación: ningún mensaje con el resultado',
         pass: result.data.status === 'completed' && !!written,
+      };
+    },
+  },
+  {
+    id: 'R24',
+    story:
+      'Lucía busca una condición con las mismas palabras que un documento archivado: ¿se le devuelve como si estuviera vigente?',
+    scenario: '— (sin banco ni modelo)',
+    contract: `La búsqueda no devuelve documentos fuera de vigor el ${REFERENCE_DATE}.`,
+    run: async () => {
+      const library = (await app('lucia', 'documents')).data.documents as any[];
+      const byId = new Map(library.map((d) => [d.id, d]));
+      const chunks = (await app('lucia', 'documents/archive-aurora-1/chunks'))
+        .data as unknown as any[];
+      const chunk = chunks.find((c) => String(c.text).includes('EUR 8 per month'));
+      if (!chunk) return { said: 'No se encontró el fragmento archivado.', bank: '—', pass: null };
+      const reply = await app('lucia', 'search', { query: chunk.text });
+      if (reply.http !== 200) return { said: said(reply), bank: '—', pass: null };
+      const results = reply.data.sources as any[];
+      const notInForce = results.filter((r) => {
+        const doc = byId.get(r.documentId);
+        return (
+          !doc || doc.validFrom > REFERENCE_DATE || (doc.validTo && doc.validTo < REFERENCE_DATE)
+        );
+      });
+      return {
+        said: `resultados: ${results.map((r) => `${r.documentId} (${Number(r.score).toFixed(2)})`).join(', ')}`,
+        bank: `Fuera de vigor: ${notInForce.length ? notInForce.map((r) => r.documentId).join(', ') : 'ninguno'}`,
+        pass: results.length > 0 && notInForce.length === 0,
+      };
+    },
+  },
+  {
+    id: 'R25',
+    story:
+      'Lucía ve los fragmentos que respaldan una respuesta: ¿dice cada uno de qué documento, versión y fecha es?',
+    scenario: '— (sin banco ni modelo)',
+    contract: 'Cada resultado de la búsqueda lleva título, versión y fecha de vigencia.',
+    run: async () => {
+      const chunks = (await app('lucia', 'documents/aurora-fees-2026/chunks'))
+        .data as unknown as any[];
+      const chunk = chunks.find((c) => String(c.text).includes('fully waived'));
+      if (!chunk)
+        return { said: 'No se encontró el fragmento de la comisión.', bank: '—', pass: null };
+      const reply = await app('lucia', 'search', { query: chunk.text });
+      if (reply.http !== 200) return { said: said(reply), bank: '—', pass: null };
+      const results = reply.data.sources as any[];
+      const incomplete = results.filter((r) => !r.title || r.version == null || !r.validFrom);
+      return {
+        said: `resultados: ${results.map((r) => `${r.documentId} · ${r.title ?? 'sin título'} · v${r.version ?? '—'} · desde ${r.validFrom ?? '—'}`).join(' / ')}`,
+        bank: `Sin título, versión o vigencia: ${incomplete.length} de ${results.length}`,
+        pass: results.length > 0 && incomplete.length === 0,
       };
     },
   },
