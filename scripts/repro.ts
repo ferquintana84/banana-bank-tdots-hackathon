@@ -654,6 +654,27 @@ const cases: Case[] = [
       };
     },
   },
+  {
+    id: 'R26',
+    story: 'Lucía pide sus movimientos al asistente: ¿puede verlos, y solo los suyos?',
+    scenario: 'normal',
+    contract: 'El asistente puede leer los movimientos del cliente, y solo el cliente.',
+    run: async () => {
+      await prepare('normal');
+      const own = await app('lucia', 'actions', { name: 'list_movements', arguments: {} });
+      const operator = await app('marta', 'actions', { name: 'list_movements', arguments: {} });
+      const accounts = new Set(
+        ((await app('lucia', 'dashboard')).data.accounts as any[]).map((a) => a.id),
+      );
+      const movements = (own.data.movements ?? []) as any[];
+      const foreign = movements.filter((m) => !accounts.has(m.accountId)).length;
+      return {
+        said: `Lucía: ${movements.length ? `${movements.length} movimientos` : said(own)} · Marta: ${said(operator)}`,
+        bank: `Movimientos de cuentas ajenas: ${foreign}`,
+        pass: movements.length > 0 && foreign === 0 && operator.http === 403,
+      };
+    },
+  },
 ];
 
 const cell = (value: string) => value.replace(/\|/g, '\\|').replace(/\s+/g, ' ');
