@@ -54,7 +54,7 @@ La prueba de aceptación humana encontró dos defectos que ningún script detect
 
 - **Inversión.** El diagnóstico empezó preguntando cómo hacer que un cliente perdiera la confianza el lunes; de ahí salieron las dos correcciones.
 - **Margen de seguridad.** Ante la duda, «pendiente de verificar», nunca «fallida»; y si la consulta al banco falla, la aplicación se detiene en lugar de reenviar.
-- **Checklist.** Cada regla del contrato es un caso del script, registrado en rojo antes del código y en verde después.
+- **Checklist.** Cada regla del contrato es un caso del script, registrado en rojo antes del código, salvo R15, que se añadió con el arreglo ya aplicado (lo declara `01-transfer-integrity.md`).
 - **Círculo de competencia.** Solo se corrigió lo que se podía verificar; lo demás está en la sección 3, no escondido.
 - **Efectos de segundo orden.** Cada cambio se probó contra lo que ya funcionaba. S1 queda declarado y sin corregir por eso mismo: cambiar código el día de la entrega pondría en riesgo lo ya verificado, y cada cambio obliga a repetir las pruebas.
 - **Efecto lollapalooza.** Varias causas juntas dan un resultado que ninguna da sola, para mal y para bien.
