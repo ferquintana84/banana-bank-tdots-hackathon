@@ -675,6 +675,54 @@ const cases: Case[] = [
       };
     },
   },
+  {
+    id: 'R27',
+    story:
+      'Lucía tiene propuestas vivas nacidas en dos conversaciones y en el formulario: ¿sabe la aplicación de dónde es cada una, y pone primero la más reciente?',
+    scenario: 'normal',
+    contract:
+      'Cada propuesta lleva su conversación, la del formulario no lleva ninguna, y la más reciente va primero.',
+    run: async () => {
+      await prepare('normal');
+      const ask = async (origin: string, conversationId?: string) => {
+        const transfer = { ...toBruno('R27'), concept: `repro-R27-${origin}-${run}` };
+        await app('lucia', 'actions', {
+          name: 'transfer_money',
+          arguments: transfer,
+          ...(conversationId ? { conversationId } : {}),
+        });
+        return transfer.concept;
+      };
+      const a = (await app('lucia', 'conversations', {})).data.id as string;
+      const b = (await app('lucia', 'conversations', {})).data.id as string;
+      const first = await ask('A', a);
+      const second = await ask('B', b);
+      const form = await ask('formulario');
+      const mine = (((await app('lucia', 'dashboard')).data.approvals ?? []) as any[]).filter((x) =>
+        [first, second, form].includes(x.payload?.concept),
+      );
+      const of = (concept: string) => mine.find((x) => x.payload.concept === concept);
+      const where = (x: any) =>
+        x?.conversationId === a
+          ? 'conversación A'
+          : x?.conversationId === b
+            ? 'conversación B'
+            : x?.conversationId === null
+              ? 'ninguna conversación'
+              : 'sin dato';
+      const order = mine.map((x) => String(x.payload.concept).split('-')[2]).join(' → ');
+      return {
+        said: `propuesta A: ${where(of(first))} · propuesta B: ${where(of(second))} · propuesta del formulario: ${where(of(form))}`,
+        bank: `Orden en que se muestran: ${order || 'ninguna'}`,
+        pass:
+          mine.length === 3 &&
+          of(first).conversationId === a &&
+          of(second).conversationId === b &&
+          of(form).conversationId === null &&
+          order === 'formulario → B → A',
+      };
+    },
+  },
 ];
 
 const cell = (value: string) => value.replace(/\|/g, '\\|').replace(/\s+/g, ' ');
