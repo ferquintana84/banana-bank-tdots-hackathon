@@ -1,6 +1,6 @@
 # Banana Bank Technical Challenge
 
-Banana Bank is a fictional bank with an AI assistant. You receive a working application with customer history and room for improvement. The challenge has two parts: assess and improve readiness for a Monday launch, then design and implement a useful, differentiating improvement to the agent or its agentic workflow. Read the [challenge brief](docs/challenge.md) ([PDF](docs/challenge.pdf)), investigate the product, and submit demonstrable improvements in a ZIP containing the complete project.
+Banana Bank is a fictional bank with an AI assistant. You receive a working application with customer history and room for improvement. The challenge has two parts: assess and improve readiness for a Monday launch, then design and implement a useful, differentiating improvement to the agent or its agentic workflow. Read the [challenge brief](challenge.md) ([PDF](challenge.pdf)), investigate the product, and submit demonstrable improvements in a ZIP containing the complete project.
 
 ## Before you start
 
@@ -50,7 +50,7 @@ Switch between eight fictional customers and two operators using the selector. L
 
 The seed contains 12 accounts, 47 conversations, and 17 support cases. The bank is authoritative for balances, movements, and operations. A separate application database stores conversations, runs, proposals, support cases, and the document index. Initial conversations are narrative fixtures; new operations traverse the actual application code and simulator.
 
-**Work on the web application, agent and their integration with the bank.** The service in `simulator/` represents an external bank, not another application you are asked to improve. Its supported failure scenarios are part of the environment the application must handle. Disabling those scenarios or changing the bank's behavior does not demonstrate an application fix. Evaluation can replace it with an independent bank implementing the same [contract](docs/contracts.md).
+**Work on the web application, agent and their integration with the bank.** The service in `simulator/` represents an external bank, not another application you are asked to improve. Its supported failure scenarios are part of the environment the application must handle. Disabling those scenarios or changing the bank's behavior does not demonstrate an application fix. Evaluation can replace it with an independent bank implementing the same [contract](contracts.md).
 
 Fresh setup and reset select the reproducible `intermittent` profile with seed `17`. While the bank is running, `npm run scenario -- normal` lets you establish a normal-response baseline; `npm run scenario -- intermittent 17` restores the initial profile. Switching profiles resets the scenario counter, not balances. Use the supported scenarios to investigate the application's behavior.
 
@@ -76,7 +76,7 @@ Existing installations: stop the services and run `npm run reset` to load the up
 
 For production mode, stop development services, run `npm run build`, then run `npm start`. Rebuild after changing application code. Development mode does not require a production build.
 
-Additional scenarios and contracts are in [contracts.md](docs/contracts.md). After changing ingestion code, run `npm run ingest`. After a reset, ingest again to restore your modified index. Changing embedding models requires regenerating the index.
+Additional scenarios and contracts are in [contracts.md](contracts.md). After changing ingestion code, run `npm run ingest`. After a reset, ingest again to restore your modified index. Changing embedding models requires regenerating the index.
 
 ## Project map
 
