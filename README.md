@@ -2,7 +2,7 @@
 
 **2.º puesto de 464 participantes, Hackathon t·Dots, octubre 2026**
 
-> **In English.** My entry to the t·Dots hackathon (Banana Bank challenge), placed 2nd of 464.
+> My entry to the t·Dots hackathon (Banana Bank challenge), placed 2nd of 464.
 > A Next.js banking app with an AI assistant and a simulated bank. I fixed the two defects that put
 > customers' money at risk: transfers are now charged once and never reported as failed without confirmation
 > from the bank, and no money moves until the customer confirms a proposal. I also added answers about the
