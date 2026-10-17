@@ -70,7 +70,7 @@ Los diagramas se escriben en Mermaid.
 | `submission/07-recorrido-visual.md` | Recorrido visual: el trabajo entero en capturas, para leer primero. |
 | `submission/notes/` | Notas de trabajo y observaciones sin verificar. Incluye `git-log.txt`, la historia completa del repositorio, porque el ZIP no lleva `.git`. |
 | `submission/ai-sessions/` | Sesiones de IA completas, en su exportación original. |
-| `submission/demo.mp4` | Vídeo de demostración de ambas partes. Se graba al final. |
+| `submission/demo.mp4` | Vídeo de demostración de ambas partes. Se graba al final. Se entregó al jurado; no se publica en este repositorio. |
 | `submission/transcript.vtt` | Transcripción del vídeo, generada automáticamente y revisada. |
 
 ## Idioma

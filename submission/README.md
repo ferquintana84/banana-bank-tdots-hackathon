@@ -52,13 +52,14 @@ Para probarlo: abrir como Lucía y preguntar «Will I pay the Aurora account fee
 ## Supporting materials
 
 - **Sesiones de IA completas:** `ai-sessions/`. Todo el código y la documentación se hicieron en una sola sesión de Claude Code. La estrategia, los criterios y los prompts se trabajaron además en una conversación con Claude (claude.ai) que actuó como asesor; no se incluye porque mezcla asuntos personales ajenos al reto. Todos los prompts que salieron de ella están, literales, en la sesión de Claude Code.
+  > En el repositorio público solo se publican los dos `.txt` legibles y el derivado. El `.jsonl`, `tool-results/` y `memory/` se entregaron al jurado y están disponibles bajo petición.
   - `ai-sessions/9997bacc-c426-419e-9f91-b3cbcdcac952.jsonl`: la sesión completa en su formato original, sin editar. Es el único archivo que la contiene entera. Se copió al final del todo, después de la prueba de extracción; lo único que no puede contener es el último paso: la búsqueda de secretos sobre esa copia y la reconstrucción del ZIP.
   - `ai-sessions/9997bacc-c426-419e-9f91-b3cbcdcac952/tool-results/`: tres resultados de herramientas a los que remite el archivo anterior.
   - `ai-sessions/memory/`: las tres notas de trabajo que la herramienta guardó entre un día y otro.
   - `ai-sessions/01-sesion-parte1.txt`: exportación legible del primer día (Parte 1).
   - `ai-sessions/02-sesion-tramo-intermedio-derivado.txt`: texto legible del tramo intermedio (Parte 2, auditoría, Go/No-Go y README). No es una exportación original: se generó del `.jsonl` con un script, sin modelo y sin resumir, porque la herramienta solo exporta lo posterior a la última compactación del contexto.
   - `ai-sessions/02-sesion-cierre.txt`: exportación legible del cierre (guion del vídeo y preparación del ZIP).
-- **Vídeo de demostración:** `demo.mp4` (9 min 52 s).
+- **Vídeo de demostración:** `demo.mp4` (9 min 52 s). Se entregó al jurado; no se publica en este repositorio y está disponible bajo petición.
 - **Transcripción del vídeo:** `transcript.vtt`. Generada automáticamente y revisada: se corrigieron siete líneas (términos, acentos y puntuación).
 - **Historia del repositorio:** [`notes/git-log.txt`](notes/git-log.txt). El ZIP no incluye `.git`, y varios documentos citan commits (por ejemplo, los casos registrados en rojo antes del código); este archivo permite comprobarlos. No cubre `demo.mp4` ni los archivos originales de la sesión (`.jsonl`, `tool-results/` y `memory/`), que no se confirmaron en git.
 - **Qué está terminado:** las dos correcciones y la funcionalidad, con su evidencia.
