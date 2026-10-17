@@ -10,3 +10,11 @@ test-results/
 .DS_Store
 *.log
 next-env.d.ts
+
+# Delivered to the jury only; not published
+submission/demo.mp4
+submission/demo.srt
+submission/ai-sessions/*.jsonl
+submission/ai-sessions/9997bacc-c426-419e-9f91-b3cbcdcac952/
+submission/ai-sessions/memory/
+*.zip
